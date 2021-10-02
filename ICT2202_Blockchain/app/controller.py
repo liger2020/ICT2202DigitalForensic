@@ -1,6 +1,6 @@
-from sqlalchemy import inspect
+import requests
 
-from app.models import Block
+from app.models import Block, Peers
 
 
 def convert_to_block(json_block):
@@ -10,6 +10,16 @@ def convert_to_block(json_block):
         return None
 
 
-def object_as_dict(obj):
-    return {c.key: getattr(obj, c.key)
-            for c in inspect(obj).mapper.column_attrs}
+def check_health(ip_address, port):
+    try:
+        resp = requests.get("http://{}:{}/health".format(ip_address, port), timeout=3)
+        if resp.status_code == 200:
+            return ip_address, port
+
+        return None
+    except:
+        return None
+
+
+def send_block(json):
+    pass
