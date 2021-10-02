@@ -1,9 +1,16 @@
 from flask import Flask
-from flaskext.mysql import MySQL
+from flask_sqlalchemy import SQLAlchemy
+from flask_restful import Api, Resource
 
 app = Flask(__name__)
+
+# Configurations
 app.config.from_object('config')
 
-mysql = MySQL(app)
+db = SQLAlchemy(app)
+api = Api(app)
 
 from app import views
+
+# Build the database
+db.create_all()
