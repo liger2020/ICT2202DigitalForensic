@@ -1,11 +1,12 @@
+import sys
 import time
+from datetime import datetime
 
 import requests
 from flask import request, jsonify
-from app import app, db, controller
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import sys
 
+from app import app, db
+from app.controller import convert_to_block, get_live_peers, send_block
 # Import module models
 from app.models import Peers, Block
 
@@ -29,14 +30,16 @@ def receive_block():
     json_blocks = request.get_json()
     for json_block in json_blocks["Blocks"]:
         # Convert into class object
-        block = controller.convert_to_block(json_block)
+        block = convert_to_block(json_block)
         if block is None:
             # print("Error processing: {}".format(json_block))
             num_of_errors += 1
             continue
 
         # Check if verified, add to Database
-        if block.isverified:
+        # TODO Block missing isverified field
+        # if block.isverified:
+        if block.previous_block_hash:
             # Create Block
             # TODO Example of inserting to DB
             db.session.add(block)
@@ -54,9 +57,9 @@ def receive_block():
 
 @app.route("/getallblocks")
 def get_all_blocks():
-    blocks = Block.query.all()
+    blocks = [x.as_dict() for x in Block.query.all()]
     # Convert Object to JSON TODO
-    return ""
+    return jsonify(output=blocks), STATUS_OK
 
 
 # Testing sending block
@@ -64,34 +67,68 @@ def get_all_blocks():
 def test():
     start = time.time()
 
-    # Check peers alive
-    live_peers = []
-    pool = ThreadPoolExecutor(5)
-    futures = []
-    peer_list = Peers.query.all()
-    for peer in peer_list:
-        futures.append(pool.submit(controller.check_health, peer.ip_address, peer.port))
-
-    for x in as_completed(futures):
-        result = x.result()
-        if result is not None:
-            live_peers.append(result)
+    # Get peers alive
+    live_peers = get_live_peers()
 
     # Send blocks to peer
-    for (ip_address, port) in live_peers:
+    output_list = []
+    for peer in live_peers:
         data = {"Blocks": [
             {
-                "ID": "1",
-                "Comment": "This is a comment",
-                "Amount": "23.21",
-                "Verified": "False"
+                "index": "1",
+                "proof_number": "1",
+                "previous_block_hash": "",
+                "meta_data": ["1", "2", "3"]
             }]
         }
 
-        r = requests.post("http://{}:{}/receiveblock".format(ip_address, port), json=data)
-        print(r.json())
-        print(r.status_code)
+        output_list.append(send_block(peer, data))
 
     end = time.time()
 
-    return jsonify({"Alive": live_peers, "Time": end - start})
+    return jsonify({"Output": output_list, "Time": end - start})
+
+
+# TODO Auth for sensitive functions (API Keys)
+# Getting Data From Database
+@app.route('/peers/<peer_ip_address>', methods=['GET'])
+def get_peers(peer_ip_address):
+    peer = Peers.query.filter_by(ip_address=str(peer_ip_address)).first_or_404()
+    return peer.as_dict()
+
+
+@app.route('/peers', methods=['PUT'])
+def create_peers():
+    peer = request.get_json()
+    if "ip_address" not in peer or "port" not in peer:
+        return 404
+
+    peer_obj = Peers(peer["ip_address"], peer["port"])
+    db.session.add(peer_obj)
+    db.session.commit()
+
+    return peer_obj.as_dict(), STATUS_OK
+
+
+@app.route('/peers', methods=['POST'])
+def update_peers():
+    peer = request.get_json()
+    if "id" not in peer or "ip_address" not in peer or "port" not in peer:
+        return 404
+
+    peer_obj = Peers.query.filter_by(id=peer["id"]).first()
+    peer_obj.ip_address = peer["ip_address"]
+    peer_obj.port = peer["port"]
+
+    db.session.commit()
+
+    return peer, STATUS_OK
+
+
+@app.route('/peers/<peer_ip_address>', methods=['DELETE'])
+def delete_peers(peer_ip_address):
+    peer = Peers.query.filter_by(ip_address=str(peer_ip_address)).first_or_404()
+    db.session.delete(peer)
+    db.session.commit()
+
+    return peer.as_dict(), STATUS_OK

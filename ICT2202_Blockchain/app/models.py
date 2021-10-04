@@ -21,6 +21,9 @@ class Peers(Base):
         self.ip_address = ip_address
         self.port = port
 
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # TODO Placeholder (Ray)
 class Block(db.Model):
@@ -31,7 +34,7 @@ class Block(db.Model):
     proof_number = db.Column(db.Integer)
     previous_block_hash = db.Column(db.String(255), nullable=True)
     meta_data = db.Column(db.String(255), nullable=True)
-    timestamp = db.Column(db.Time, nullable=True)
+    timestamp = db.Column(db.DateTime, nullable=True)
     block_hash = db.Column(db.String(255), nullable=True)
 
     def __init__(self, index, proof_number, previous_block_hash, meta_data):
@@ -54,3 +57,6 @@ class Block(db.Model):
     def __repr__(self):
         return "index: {}\nproof_number: {}\nprevious_block_hash: {}\nmeta_data: {}\ntimestamp: {}".format(self.index, self.proof_number, self.previous_block_hash,
                                                                           self.meta_data, self.timestamp)
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
