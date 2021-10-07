@@ -61,7 +61,6 @@ def get_all_blocks():
     # Convert Object to JSON TODO
     return jsonify(output=blocks), STATUS_OK
 
-
 # Testing sending block
 @app.route("/test")
 def test():
@@ -132,3 +131,11 @@ def delete_peers(peer_ip_address):
     db.session.commit()
 
     return peer.as_dict(), STATUS_OK
+
+
+@app.route("/getlastblocks")
+def getlastblocks():
+    blocks = [x.as_dict() for x in Block.query.all()]
+    print(blocks[-1].get('block_hash'))
+    # Convert Object to JSON TODO
+    return jsonify(output=blocks), STATUS_OK
