@@ -1,5 +1,5 @@
 import requests
-
+import random
 from app.models import Block, Peers
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -53,3 +53,26 @@ def send_block(peer, data):
               }
 
     return output
+
+
+def verify():
+    peer_list = Peers.query.all()
+    blocks = [x.as_dict() for x in Block.query.all()]
+
+
+    last_block = blocks[-1].get('block_hash')
+    case_id = blocks[-1].get('index')
+    print(peer_list)
+
+    #select 51% of the peers
+    print(random.choices(peer_list))
+    print(case_id)
+    #Check if last block's hash matches user's
+    #if case_id == "1": # Check if case ID match
+    if last_block == "123":  #Let 123 be last block matches with user's side last hash 
+        print("Yes") #consensus is send to the speaker
+    else:
+        print("No")
+
+
+verify()
