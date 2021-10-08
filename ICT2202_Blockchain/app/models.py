@@ -37,26 +37,47 @@ class Block(db.Model):
     timestamp = db.Column(db.DateTime, nullable=True)
     block_hash = db.Column(db.String(255), nullable=True)
 
-    def __init__(self, index, proof_number, previous_block_hash, meta_data):
+# TODO Placeholder (Ray)
+class Block(db.Model):
+    __tablename__ = "Block"
+    __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer, primary_key=True)
+    block_number = db.Column(db.Integer, secondary_key=True)
+    previous_block_hash = db.Column(db.String(255))
+    meta_data = db.Column(db.String(255), nullable=True)
+    log = db.Column(db.String(255), nullable=True)
+    timestamp = db.Column(db.DateTime, nullable=True)
+    block_hash = db.Column(db.String(255))
+    status = db.Column(db.Boolean)
+
+    def __init__(self, id, block_number, previous_block_hash, meta_data, log, status):
         """
         this for the creation of a new block NOT for the blockchain
-        :param index: case number
-        :param proof_number: position in the blockchain
+        :param id: case number
+        :param block_number: position in the blockchain
         :param previous_block_hash: this refers to the hash of the previous block within the chain;
         :param meta_data: this refers to whatever information we want to put in. can give json format or just str.
         """
-        self.index = index
-        self.proof_number = proof_number
+        self.id = id
+        self.block_number = block_number
         self.previous_block_hash = str(previous_block_hash)
         self.meta_data = meta_data
+        self.log = log
         self.timestamp = str(datetime.now())
-        self.block_data = "-".join(meta_data) + "-" + self.timestamp \
+        self.block_data = "-".join(meta_data) + "-".join(log) + "-" + self.timestamp \
                           + "-" + self.previous_block_hash
         self.block_hash = hashlib.sha256(self.block_data.encode()).hexdigest()
+        self.status = status
 
     def __repr__(self):
-        return "index: {}\nproof_number: {}\nprevious_block_hash: {}\nmeta_data: {}\ntimestamp: {}".format(self.index, self.proof_number, self.previous_block_hash,
-                                                                          self.meta_data, self.timestamp)
+        return "id: {}\nblock_number: {}\nprevious_block_hash: {}\nmeta_data: {}\nlog: " \
+               "{}\ntimestamp: {}\nblock_hash: {}\nstatus: {}".format(self.id,
+                                                                      self.block_number,
+                                                                      self.previous_block_hash,
+                                                                      self.meta_data,self.log,
+                                                                      self.timestamp,
+                                                                      self.block_hash,
+                                                                      self.status)
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
