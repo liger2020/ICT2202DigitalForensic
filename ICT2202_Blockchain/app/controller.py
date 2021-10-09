@@ -1,5 +1,6 @@
 import requests
 import random
+import math
 from app.models import Block, Peers
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -54,25 +55,38 @@ def send_block(peer, data):
 
     return output
 
+'''
+User will store Case id and the last block hash of the respective cases they are in.
+When verification is needed, the server will select 51 percent of the people in the case. 
+These delegates will then verify the hash of the block and return a yes/no respond to the server.
+'''
+
+
+
+
+def randomselect():
+    peer_list = Peers.query.all()
+    numberofpeer = len(peer_list)
+    fiftyone = math.ceil(numberofpeer * 0.51)
+    delegates = random.sample(peer_list,fiftyone)
+    print(delegates)
+    return delegates
+
 
 def verify():
-    peer_list = Peers.query.all()
     blocks = [x.as_dict() for x in Block.query.all()]
-
-
     last_block = blocks[-1].get('block_hash')
-    case_id = blocks[-1].get('index')
-    print(peer_list)
-
-    #select 51% of the peers
-    print(random.choices(peer_list))
-    print(case_id)
+    case_id = blocks[-1].get('id')
+    
+    print("This case the case ID: " + str(case_id))
     #Check if last block's hash matches user's
-    #if case_id == "1": # Check if case ID match
-    if last_block == "123":  #Let 123 be last block matches with user's side last hash 
-        print("Yes") #consensus is send to the speaker
+    if case_id == 1: # Check if case ID match
+        if last_block == "562c23f9930736895604b10504d3f0fb257316a9895e7949910bf39246548e9b":  #Let 123 be last block matches with user's side last hash 
+            print("Yes") #consensus is send to the speaker
+        else:
+            print("No")
     else:
-        print("No")
+        print("No tele")
 
-
-verify()
+#verify()
+randomselect()
