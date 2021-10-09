@@ -42,6 +42,7 @@ def receive_block():
         if block.previous_block_hash:
             # Create Block
             # TODO Example of inserting to DB
+
             db.session.add(block)
             db.session.commit()
         else:
@@ -139,3 +140,10 @@ def getlastblocks():
     print(blocks[-1].get('block_hash'))
     # Convert Object to JSON TODO
     return jsonify(output=blocks), STATUS_OK
+
+@app.route("/insertblock")
+def insertblock():
+    test = Block(1,"test","test",True)
+    db.session.add(test)
+    db.session.commit()
+
