@@ -38,17 +38,18 @@ def receive_block():
 
         # Check if verified, add to Database
         # TODO Block missing isverified field
-        # if block.isverified:
-        if block.previous_block_hash:
-            # Create Block
-            # TODO Example of inserting to DB
+        """ Note: Might have to do a loop here to do a check if verified after the block status is NOT verified"""
+        if block.status == "verified": 
+            if block.previous_block_hash:
+                # Create Block
+                # TODO Example of inserting to DB
 
-            db.session.add(block)
-            db.session.commit()
-        else:
-            # Add to pool
-            # TODO
-            pass
+                db.session.add(block) 
+                db.session.commit()
+            else:
+                # Add to pool
+                # TODO
+                pass
 
     # Print extra info
     json_blocks.update({"Errors": num_of_errors})
