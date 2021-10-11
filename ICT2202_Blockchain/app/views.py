@@ -11,6 +11,7 @@ from app.controller import convert_to_block, get_live_peers, send_block
 from app.models import Peers, Block
 
 STATUS_OK = 200
+STATUS_NOT_FOUND = 404
 
 
 @app.route("/health")
@@ -39,12 +40,10 @@ def receive_block():
         # Check if verified, add to Database
         # TODO Block missing isverified field
         """ Note: Might have to do a loop here to do a check if verified after the block status is NOT verified"""
-        if block.status == "verified": 
+        if block.status:
             if block.previous_block_hash:
                 # Create Block
-                # TODO Example of inserting to DB
-
-                db.session.add(block) 
+                db.session.add(block)
                 db.session.commit()
             else:
                 # Add to pool
@@ -62,6 +61,7 @@ def get_all_blocks():
     blocks = [x.as_dict() for x in Block.query.all()]
     # Convert Object to JSON TODO
     return jsonify(output=blocks), STATUS_OK
+
 
 # Testing sending block
 @app.route("/test")
@@ -88,6 +88,43 @@ def test():
     end = time.time()
 
     return jsonify({"Output": output_list, "Time": end - start})
+
+
+@app.route('/sync')
+def sync():
+    output = []
+    id_list = Block.query.with_entities(Block.id).distinct()
+    for case_id in id_list:
+        case_id = case_id[0]  # IDK why
+        length = Block.query.filter_by(id=case_id).count()  # Get length of ID
+        output.append({"id": case_id, "length": length})
+    return jsonify(Blocks=output)
+
+
+# Syncing blockchain, request length of id, if longer send all blocks above length (Honestly cutting corners here)
+@app.route('/sync', methods=['POST'])
+def sync_receive():
+    resp = request.get_json()
+    # Make sure json is valid
+    if "id" not in resp or "length" not in resp:
+        return "", STATUS_NOT_FOUND
+
+    resp_id = resp["id"]
+    resp_length = resp["length"]
+    output_list = []
+    block_list_count = 0
+    length = Block.query.filter_by(id=resp_id).count()  # Get length of ID
+
+    # If length is longer then sender, send blocks
+    if length > resp_length:
+        # Get all blocks above length
+        block_list = Block.query.filter(Block.id == resp_id, Block.block_number >= resp_length).order_by(
+            Block.block_number.desc())
+        block_list_count = Block.query.filter(Block.block_number >= resp_length).count()  # For printing only
+        for block in block_list:
+            data = block.as_dict()
+            output_list.append(data)
+    return jsonify({"Blocks": output_list, "length": length, "Count": block_list_count})
 
 
 # TODO Auth for sensitive functions (API Keys)
@@ -142,9 +179,9 @@ def getlastblocks():
     # Convert Object to JSON TODO
     return jsonify(output=blocks), STATUS_OK
 
+
 @app.route("/insertblock")
 def insertblock():
-    test = Block(1,"test","test",True)
+    test = Block(1, "test", "test", True)
     db.session.add(test)
     db.session.commit()
-
