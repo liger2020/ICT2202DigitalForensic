@@ -80,8 +80,8 @@ def verify():
     
     print("This case the case ID: " + str(case_id))
     #Check if last block's hash matches user's
-    if case_id == 1: # Check if case ID match
-        if last_block == "562c23f9930736895604b10504d3f0fb257316a9895e7949910bf39246548e9b":  #Let 123 be last block matches with user's side last hash 
+    if case_id == 1: # Let the value 1 be case id value stored in user side.
+        if last_block == "123":  #Let 123 be last block hash stored in user side.
             print("Yes") #consensus is send to the speaker
         else:
             print("No")
