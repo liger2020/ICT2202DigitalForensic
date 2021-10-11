@@ -70,8 +70,7 @@ def randomselect():
     fiftyone = math.ceil(numberofpeer * 0.51)
     delegates = random.sample(peer_list,fiftyone)
     print(delegates)
-    return delegates
-
+    return delegates #List of user to give their consensus. 
 
 def verify():
     blocks = [x.as_dict() for x in Block.query.all()]
@@ -84,9 +83,9 @@ def verify():
         if last_block == "123":  #Let 123 be last block hash stored in user side.
             print("Yes") #consensus is send to the speaker
         else:
-            print("No")
+            print("No") #consensus is send to the speaker
     else:
-        print("No tele")
+        None 
 
 #verify()
 randomselect()
