@@ -8,7 +8,7 @@ from flask import request, jsonify
 from app import app, db
 from app.controller import convert_to_block, get_live_peers, send_block
 # Import module models
-from app.models import Peers, Block
+from app.models import Peers, Block, Pool
 
 STATUS_OK = 200
 STATUS_NOT_FOUND = 404
@@ -174,14 +174,20 @@ def delete_peers(peer_ip_address):
 
 @app.route("/getlastblocks")
 def getlastblocks():
-    blocks = [x.as_dict() for x in Block.query.all()]
-    print(blocks[-1].get('block_hash'))
+    blocks = [x.as_dict() for x in Pool.query.all()]
+    print(blocks)
     # Convert Object to JSON TODO
     return jsonify(output=blocks), STATUS_OK
 
 
 @app.route("/insertblock")
 def insertblock():
-    test = Block(1, "test", "test", True)
+    blocks = [x.as_dict() for x in Block.query.all()]
+    case_id = blocks[-1].get('id')
+    block_number = blocks[-1].get('block_number') + 1
+    block_hash =  blocks[-1].get('block_hash')
+    time_stamp = blocks[-1].get('timestamp')
+    test = Pool(case_id, block_number, block_hash, "test", "test", time_stamp, False)
     db.session.add(test)
     db.session.commit()
+
