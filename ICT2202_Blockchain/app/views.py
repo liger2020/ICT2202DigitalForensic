@@ -26,6 +26,7 @@ def current_health():
 def receive_block():
     # For Info
     num_of_errors = 0
+    blocks = [x.as_dict() for x in Block.query.all()]
 
     # Check block need verify
     json_blocks = request.get_json()
@@ -39,16 +40,20 @@ def receive_block():
 
         # Check if verified, add to Database
         # TODO Block missing isverified field
-        """ Note: Might have to do a loop here to do a check if verified after the block status is NOT verified"""
         if block.status:
             if block.previous_block_hash:
                 # Create Block
                 db.session.add(block)
                 db.session.commit()
             else:
-                # Add to pool
-                # TODO
-                pass
+                #ADD TO POOL         
+                case_id = blocks[-1].get('id')
+                block_number = blocks[-1].get('block_number') + 1
+                block_hash =  blocks[-1].get('block_hash')
+                time_stamp = blocks[-1].get('timestamp')
+                test = Pool(case_id, block_number, block_hash, "test", "test", time_stamp, False)
+                db.session.add(test)
+                db.session.commit()
 
     # Print extra info
     json_blocks.update({"Errors": num_of_errors})
@@ -191,3 +196,4 @@ def insertblock():
     db.session.add(test)
     db.session.commit()
 
+    return STATUS_OK
