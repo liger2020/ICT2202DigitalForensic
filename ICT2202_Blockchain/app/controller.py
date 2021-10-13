@@ -92,11 +92,12 @@ def randomselect():
 
 
 def verify():
+    chosen_ones = randomselect()
+    #how to send to the user? 
     blocks = [x.as_dict() for x in Block.query.all()]
     last_block = blocks[-1].get('block_hash')
     case_id = blocks[-1].get('id')
 
-    print("This case the case ID: " + str(case_id))
     # Check if last block's hash matches user's
     if case_id == 1:  # Let the value 1 be case id value stored in user side.
         if last_block == "123":  # Let 123 be last block hash stored in user side.

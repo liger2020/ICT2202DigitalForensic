@@ -94,8 +94,9 @@ class Pool(db.Model):
     timestamp = db.Column(db.DateTime, nullable=True)
     block_hash = db.Column(db.String(255))
     status = db.Column(db.Boolean)
+    count = db.Column(db.Integer, nullable=True)
 
-    def __init__(self, case_id, block_number,previous_block_hash, meta_data, log, time_stamp, status):
+    def __init__(self, case_id, block_number,previous_block_hash, meta_data, log, time_stamp, status, count):
         """
         this for the creation of a new block NOT for the blockchain
         :param id: case number
@@ -114,16 +115,18 @@ class Pool(db.Model):
                           + "-" + self.previous_block_hash
         self.block_hash = hashlib.sha256(self.block_data.encode()).hexdigest()
         self.status = status
+        self.count = count
 
     def __repr__(self):
         return "case_id: {}\nblock_number: {}\nprevious_block_hash: {}\nmeta_data: {}\nlog: " \
-               "{}\ntimestamp: {}\nblock_hash: {}\nstatus: {}".format(self.case_id,
+               "{}\ntimestamp: {}\nblock_hash: {}\nstatus: {}\ncount:".format(self.case_id,
                                                                     self.block_number,
                                                                       self.previous_block_hash,
                                                                       self.meta_data, self.log,
                                                                       self.timestamp,
                                                                       self.block_hash,
-                                                                      self.status)
+                                                                      self.status,
+                                                                      self.count)
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}

@@ -180,7 +180,6 @@ def delete_peers(peer_ip_address):
 @app.route("/getlastblocks")
 def getlastblocks():
     blocks = [x.as_dict() for x in Pool.query.all()]
-    print(blocks)
     # Convert Object to JSON TODO
     return jsonify(output=blocks), STATUS_OK
 
@@ -192,8 +191,8 @@ def insertblock():
     block_number = blocks[-1].get('block_number') + 1
     block_hash =  blocks[-1].get('block_hash')
     time_stamp = blocks[-1].get('timestamp')
-    test = Pool(case_id, block_number, block_hash, "test", "test", time_stamp, False)
+    test = Pool(case_id, block_number, block_hash, "test", "test", time_stamp, False, 1)
     db.session.add(test)
     db.session.commit()
 
-    return STATUS_OK
+    return jsonify(output=test), STATUS_OK
