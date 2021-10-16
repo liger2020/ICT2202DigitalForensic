@@ -95,6 +95,7 @@ class Pool(db.Model):
     block_hash = db.Column(db.String(255))
     status = db.Column(db.Boolean)
     count = db.Column(db.Integer, nullable=True)
+    sendout_time = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, case_id, meta_data, log):
         """
@@ -116,6 +117,7 @@ class Pool(db.Model):
         self.block_hash = hashlib.sha256(self.block_data.encode()).hexdigest()
         self.status = False
         self.count = 0
+        self.sendout_time = None
 
     def __repr__(self):
         return "case_id: {}\nblock_number: {}\nprevious_block_hash: {}\nmeta_data: {}\nlog: " \

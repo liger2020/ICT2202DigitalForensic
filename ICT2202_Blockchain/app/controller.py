@@ -162,6 +162,20 @@ def sync_schedule():
                     db.session.add(block)
                 db.session.commit()
 
+def send_unverified_block():
+    # Every 5 Second
+    list_of_unverified = Query Pool
+    # pool = ThreadPoolExecutor(5)  # 5 Worker Threads
+    for unveri in list_of_unverified:
+
+        # If send_timestamp is not None, send_timestamp + TIMEOUT <= date.now(), count += 1;
+        list_of_users = randomselect()
+
+        # Send to user
+        # futures.append(pool.submit(send_block, peer, data))
+        # unveri set send send_timestamp
+
+
 
 # verify()
 randomselect()

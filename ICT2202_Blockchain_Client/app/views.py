@@ -17,35 +17,21 @@ def current_health():
     return resp, STATUS_OK
 
 
-@app.route('/receiveblock', methods=['POST'])
-def receive_block():
-    # For Info
-    num_of_errors = 0
-
-    # Check block need verify
-    json_blocks = request.get_json()
-    for json_block in json_blocks["Blocks"]:
-        # Convert into class object
-        block = convert_to_block(json_block)
-        if block is None:
-            # print("Error processing: {}".format(json_block))
-            num_of_errors += 1
-            continue
-
-        # Check if verified, add to Database
-        # TODO Block missing isverified field
-        """ Note: Might have to do a loop here to do a check if verified after the block status is NOT verified"""
-        if block.status:
-            if block.previous_block_hash:
-                # Create Block
-                db.session.add(block)
-                db.session.commit()
-            else:
-                # Add to pool
-                # TODO
-                pass
-
-    # Print extra info
-    json_blocks.update({"Errors": num_of_errors})
-
+@app.route('/receivepool', methods=['POST'])
+def receive():
+    pool_json = request.get_json()  # Convert string to json object
+    pool_json["id"]
+    resp = verify(pool_json)
+    send(resp, server)
+    #
+    #
+    #
     return json_blocks, STATUS_OK
+
+# Server~
+@app.route('/receive')
+def receive_resp():
+    resp = request.get_json()
+    a = Block.query
+    a.id =
+    db.session.add()

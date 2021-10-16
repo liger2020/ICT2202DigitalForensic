@@ -22,6 +22,7 @@ def current_health():
     return resp, STATUS_OK
 
 
+# Assuming unverified
 @app.route('/receiveblock', methods=['POST'])
 def receive_block():
     # For Info
@@ -38,9 +39,7 @@ def receive_block():
             num_of_errors += 1
             continue
 
-        # Check if verified, add to Database
-        # TODO Block missing isverified field
-        # Create Block
+        # Add to Pool
         db.session.add(block)
         db.session.commit()
 
@@ -49,38 +48,52 @@ def receive_block():
     return json_blocks, STATUS_OK
 
 
-@app.route("/getallblocks")
-def get_all_blocks():
-    blocks = [x.as_dict() for x in Block.query.all()]
-    # Convert Object to JSON TODO
-    return jsonify(output=blocks), STATUS_OK
+@app.route('/receive_response', methods=['POST'])
+def receive_response():
+    # # {"id": "2", "case-id": "2", "Response": "yes"}
+    # resp = request.get_json()
+    # response_timestamp = pool.query(id=id).send_timestamp
+    # if response_timestamp <= date.now() + TIMEOUT:
+    #     # Discard
+    #     pass
+    # else:
+    #     # Add to Consesus Table
+    #     # Check if id has 2/3 >, add to block
+    pass
+
+
+# @app.route("/getallblocks")
+# def get_all_blocks():
+#     blocks = [x.as_dict() for x in Block.query.all()]
+#     # Convert Object to JSON TODO
+#     return jsonify(output=blocks), STATUS_OK
 
 
 # Testing sending block
-@app.route("/test")
-def test():
-    start = time.time()
-
-    # Get peers alive
-    live_peers = get_live_peers()
-
-    # Send blocks to peer
-    output_list = []
-    for peer in live_peers:
-        data = {"Blocks": [
-            {
-                "index": "1",
-                "proof_number": "1",
-                "previous_block_hash": "",
-                "meta_data": ["1", "2", "3"]
-            }]
-        }
-
-        output_list.append(send_block(peer, data))
-
-    end = time.time()
-
-    return jsonify({"Output": output_list, "Time": end - start})
+# @app.route("/test")
+# def test():
+#     start = time.time()
+#
+#     # Get peers alive
+#     live_peers = get_live_peers()
+#
+#     # Send blocks to peer
+#     output_list = []
+#     for peer in live_peers:
+#         data = {"Blocks": [
+#             {
+#                 "index": "1",
+#                 "proof_number": "1",
+#                 "previous_block_hash": "",
+#                 "meta_data": ["1", "2", "3"]
+#             }]
+#         }
+#
+#         output_list.append(send_block(peer, data))
+#
+#     end = time.time()
+#
+#     return jsonify({"Output": output_list, "Time": end - start})
 
 
 @app.route('/sync')
@@ -177,16 +190,17 @@ def getlastblocks():
 @app.route("/insertblock")
 def insertblock():
     blocks = [x.as_dict() for x in Block.query.all()]
-    #case_id = blocks[-1].get('id')
-    #block_number = blocks[-1].get('block_number') + 1
-    #block_hash =  blocks[-1].get('block_hash')
-    #time_stamp = blocks[-1].get('timestamp')
-    #test = Block(1, meta_data="test", log="test", status=True)
+    # case_id = blocks[-1].get('id')
+    # block_number = blocks[-1].get('block_number') + 1
+    # block_hash =  blocks[-1].get('block_hash')
+    # time_stamp = blocks[-1].get('timestamp')
+    # test = Block(1, meta_data="test", log="test", status=True)
     test = Pool(1, meta_data="test", log="test")
     db.session.add(test)
     db.session.commit()
 
     return jsonify(output=test), STATUS_OK
+
 
 @app.route("/query")
 def check_query():
