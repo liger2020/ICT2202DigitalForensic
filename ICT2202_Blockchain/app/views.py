@@ -6,7 +6,7 @@ import requests
 from flask import request, jsonify
 
 from app import app, db
-from app.controller import convert_to_block, get_live_peers, send_block
+from app.controller import convert_to_block, get_live_peers, send_block, convert_to_pool
 # Import module models
 from app.models import Peers, Block, Pool
 
@@ -26,13 +26,13 @@ def current_health():
 def receive_block():
     # For Info
     num_of_errors = 0
-    blocks = [x.as_dict() for x in Block.query.all()]
 
     # Check block need verify
     json_blocks = request.get_json()
-    for json_block in json_blocks["Blocks"]:
+    for json_block in json_blocks["Pool"]:
         # Convert into class object
-        block = convert_to_block(json_block)
+        block = convert_to_pool(json_block)
+        # print(block)
         if block is None:
             # print("Error processing: {}".format(json_block))
             num_of_errors += 1
@@ -40,24 +40,12 @@ def receive_block():
 
         # Check if verified, add to Database
         # TODO Block missing isverified field
-        if block.status:
-            if block.previous_block_hash:
-                # Create Block
-                db.session.add(block)
-                db.session.commit()
-            else:
-                #ADD TO POOL         
-                case_id = blocks[-1].get('id')
-                block_number = blocks[-1].get('block_number') + 1
-                block_hash =  blocks[-1].get('block_hash')
-                time_stamp = blocks[-1].get('timestamp')
-                test = Pool(case_id, block_number, block_hash, "test", "test", time_stamp, False)
-                db.session.add(test)
-                db.session.commit()
+        # Create Block
+        db.session.add(block)
+        db.session.commit()
 
     # Print extra info
     json_blocks.update({"Errors": num_of_errors})
-
     return json_blocks, STATUS_OK
 
 
@@ -179,7 +167,9 @@ def delete_peers(peer_ip_address):
 
 @app.route("/getlastblocks")
 def getlastblocks():
-    blocks = [x.as_dict() for x in Pool.query.all()]
+    blocks = [x.as_dict() for x in Block.query.all()]
+    for block in blocks:
+        print(block)
     # Convert Object to JSON TODO
     return jsonify(output=blocks), STATUS_OK
 
@@ -187,12 +177,21 @@ def getlastblocks():
 @app.route("/insertblock")
 def insertblock():
     blocks = [x.as_dict() for x in Block.query.all()]
-    case_id = blocks[-1].get('id')
-    block_number = blocks[-1].get('block_number') + 1
-    block_hash =  blocks[-1].get('block_hash')
-    time_stamp = blocks[-1].get('timestamp')
-    test = Pool(case_id, block_number, block_hash, "test", "test", time_stamp, False, 1)
+    #case_id = blocks[-1].get('id')
+    #block_number = blocks[-1].get('block_number') + 1
+    #block_hash =  blocks[-1].get('block_hash')
+    #time_stamp = blocks[-1].get('timestamp')
+    #test = Block(1, meta_data="test", log="test", status=True)
+    test = Pool(1, meta_data="test", log="test")
     db.session.add(test)
     db.session.commit()
 
     return jsonify(output=test), STATUS_OK
+
+@app.route("/query")
+def check_query():
+    queries = Block.query.filter_by(id=1).all()
+    for query in queries:
+        print(query)
+
+    return str(query), STATUS_OK

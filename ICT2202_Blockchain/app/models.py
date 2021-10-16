@@ -39,7 +39,7 @@ class Block(db.Model):
     block_hash = db.Column(db.String(255))
     status = db.Column(db.Boolean)
 
-    def __init__(self, id, meta_data, log, status):
+    def __init__(self, id, meta_data, log):
         """
         this for the creation of a new block NOT for the blockchain
         :param id: case number
@@ -57,7 +57,7 @@ class Block(db.Model):
         self.block_data = "-".join(meta_data) + "-".join(log) + "-" + str(self.timestamp) \
                           + "-" + self.previous_block_hash
         self.block_hash = hashlib.sha256(self.block_data.encode()).hexdigest()
-        self.status = status
+        self.status = False 
 
     def __repr__(self):
         return "id: {}\nblock_number: {}\nprevious_block_hash: {}\nmeta_data: {}\nlog: " \
@@ -96,7 +96,7 @@ class Pool(db.Model):
     status = db.Column(db.Boolean)
     count = db.Column(db.Integer, nullable=True)
 
-    def __init__(self, case_id, block_number,previous_block_hash, meta_data, log, time_stamp, status, count):
+    def __init__(self, case_id, meta_data, log):
         """
         this for the creation of a new block NOT for the blockchain
         :param id: case number
@@ -106,16 +106,16 @@ class Pool(db.Model):
         """
 
         self.case_id = case_id 
-        self.block_number = block_number
+        self.set_block_number()
+
         self.meta_data = meta_data
         self.log = log
-        self.timestamp = time_stamp
-        self.previous_block_hash = previous_block_hash
+        self.timestamp = datetime.now()
         self.block_data = "-".join(meta_data) + "-".join(log) + "-" +  str(self.timestamp) \
                           + "-" + self.previous_block_hash
         self.block_hash = hashlib.sha256(self.block_data.encode()).hexdigest()
-        self.status = status
-        self.count = count
+        self.status = False
+        self.count = 0
 
     def __repr__(self):
         return "case_id: {}\nblock_number: {}\nprevious_block_hash: {}\nmeta_data: {}\nlog: " \
@@ -127,6 +127,15 @@ class Pool(db.Model):
                                                                       self.block_hash,
                                                                       self.status,
                                                                       self.count)
+
+    def set_block_number(self):
+        result = Block.query.filter_by(id=self.case_id).order_by(Block.block_number.desc()).first()
+        if result is None:
+            self.block_number = 0
+            self.previous_block_hash = str("")
+        else:
+            self.block_number = result.block_number+1
+            self.previous_block_hash = result.block_hash
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}

@@ -6,14 +6,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 
 from app import db
-from app.models import Block, Peers
+from app.models import Block, Peers, Pool
 
 SYNC_INTERVAL = 60 * 10  # 10 Mins
 
 
 def convert_to_block(json_block):
     try:
-        block = Block(json_block["id"], json_block["meta_data"], json_block["log"], json_block["status"])
+        block = Block(json_block["id"], json_block["meta_data"], json_block["log"])
         if "block_number" in json_block and "previous_block_hash" in json_block and "timestamp" in json_block and "block_hash" in json_block:
             block.id = json_block["id"]
             block.block_number = json_block["block_number"]
@@ -30,6 +30,25 @@ def convert_to_block(json_block):
     except KeyError:
         return None
 
+
+def convert_to_pool(json_block):
+    try:
+        pool = Pool(json_block["id"], json_block["meta_data"], json_block["log"])
+        if "block_number" in json_block and "previous_block_hash" in json_block and "timestamp" in json_block and "block_hash" in json_block:
+            pool.id = json_block["id"]
+            pool.block_number = json_block["block_number"]
+            pool.previous_block_hash = json_block["previous_block_hash"]
+            pool.meta_data = json_block["meta_data"]
+            pool.log = json_block["log"]
+            if isinstance(json_block["timestamp"], str):
+                pool.timestamp = parser.parse(json_block["timestamp"])
+            else:
+                pool.timestamp = json_block["timestamp"]
+            pool.block_hash = json_block["block_hash"]
+            pool.status = json_block["status"]
+        return pool
+    except KeyError:
+        return None
 
 def check_health(peer):
     try:
