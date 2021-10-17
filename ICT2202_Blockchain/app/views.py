@@ -133,24 +133,32 @@ def sync():
 def sync_receive():
     resp = request.get_json()
     # Make sure json is valid
-    if "id" not in resp or "length" not in resp:
+    if "id" not in resp or "length" not in resp or "last" not in resp:
         return "", STATUS_NOT_FOUND
 
     resp_id = resp["id"]
     resp_length = resp["length"]
+    resp_last = resp["last"] == 1
     output_list = []
     block_list_count = 0
     length = Block.query.filter_by(id=resp_id).count()  # Get length of ID
 
     # If length is longer then sender, send blocks
     if length > resp_length:
-        # Get all blocks above length
-        block_list = Block.query.filter(Block.id == resp_id, Block.block_number >= resp_length).order_by(
-            Block.block_number.desc())
-        block_list_count = Block.query.filter(Block.block_number >= resp_length).count()  # For printing only
-        for block in block_list:
-            data = block.as_dict()
+        if resp_last:
+            # Get last block only (For Client)
+            last_block = Block.query.filter(Block.id == resp_id, Block.block_number >= resp_length).order_by(
+                Block.block_number.desc()).first()
+            data = last_block.as_dict()
             output_list.append(data)
+        else:
+            # Get all blocks above length (For Nodes)
+            block_list = Block.query.filter(Block.id == resp_id, Block.block_number >= resp_length).order_by(
+                Block.block_number.desc())
+            block_list_count = Block.query.filter(Block.block_number >= resp_length).count()  # For printing only
+            for block in block_list:
+                data = block.as_dict()
+                output_list.append(data)
     return jsonify({"Blocks": output_list, "length": length, "Count": block_list_count})
 
 
