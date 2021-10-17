@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 
 from app import db
-from app.models import Block, Peers, Pool
+from app.models import Block, Peers, Pool, Consesus
 
 SYNC_INTERVAL = 60 * 10  # 10 Mins
 
@@ -48,6 +48,16 @@ def convert_to_pool(json_block):
             pool.status = json_block["status"]
         return pool
     except KeyError:
+        return None
+
+# Placeholder TODO
+def convert_to_consesus(json_block, ip_address):
+    try:
+        consesus = Consesus(ip_address, json_block["pool_id"], json_block["response"])
+        return consesus
+    except KeyError:
+        return None
+    except TypeError:
         return None
 
 def check_health(peer):
