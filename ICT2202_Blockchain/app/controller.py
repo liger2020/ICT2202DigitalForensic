@@ -2,7 +2,7 @@ from dateutil import parser
 import math
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
+from datetime import datetime
 import requests
 
 from app import db
@@ -112,6 +112,7 @@ def randomselect():
 
 def verify():
     chosen_ones = randomselect()
+    send_unverified_block()
     #how to send to the user? 
     blocks = [x.as_dict() for x in Block.query.all()]
     last_block = blocks[-1].get('block_hash')
@@ -163,19 +164,34 @@ def sync_schedule():
                 db.session.commit()
 
 def send_unverified_block():
-    # Every 5 Second
-    list_of_unverified = Query Pool
-    # pool = ThreadPoolExecutor(5)  # 5 Worker Threads
-    for unveri in list_of_unverified:
-
-        # If send_timestamp is not None, send_timestamp + TIMEOUT <= date.now(), count += 1;
-        list_of_users = randomselect()
-
+    # Every 10 Second
+    futures = []
+    list_of_unverified = [x.as_dict() for x in Pool.query.order_by('case_id')]
+    list_of_users = randomselect()
+    pool = ThreadPoolExecutor(5)  # 5 Worker Threads
+    for unverified_block in list_of_unverified:
+        block = convert_to_pool(unverified_block)
+        #data = block.case_id, block.meta_data, block.log, block.previous_block_hash, block.block_hash
+        count = block.count
+        print(block.sendout_time)
+        if block.sendout_time is None:        
+            block.sendout_time = datetime.now()
+            db.session.commit()
+            print(block.sendout_time)
+            # for peer in list_of_users:
+            #     futures.append(pool.submit(send_block, peer, data)) #send block to user
+            #check if user belong to case (dk how to check)
+            count += 1 #increment count 
+        else:
+            pass 
+            #
+    #     If send_timestamp is not None, send_timestamp + TIMEOUT <= date.now(), count += 1;
+    db.session.commit()
         # Send to user
         # futures.append(pool.submit(send_block, peer, data))
         # unveri set send send_timestamp
 
 
-
+send_unverified_block()
 # verify()
-randomselect()
+# randomselect()
