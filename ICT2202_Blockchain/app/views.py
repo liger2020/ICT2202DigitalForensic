@@ -1,17 +1,19 @@
+import math
 import sys
 import time
-from datetime import datetime
+import datetime
 
 import requests
 from flask import request, jsonify
 
 from app import app, db
-from app.controller import convert_to_block, get_live_peers, send_block, convert_to_pool
+from app.controller import convert_to_block, get_live_peers, send_block, convert_to_pool, convert_to_consesus
 # Import module models
-from app.models import Peers, Block, Pool
+from app.models import Peers, Block, Pool, Consesus
 
 STATUS_OK = 200
 STATUS_NOT_FOUND = 404
+TIMEOUT = 60 * 15
 
 
 @app.route("/health")
@@ -50,16 +52,35 @@ def receive_block():
 
 @app.route('/receive_response', methods=['POST'])
 def receive_response():
-    # # {"id": "2", "case-id": "2", "Response": "yes"}
-    # resp = request.get_json()
-    # response_timestamp = pool.query(id=id).send_timestamp
-    # if response_timestamp <= date.now() + TIMEOUT:
-    #     # Discard
-    #     pass
-    # else:
-    #     # Add to Consesus Table
-    #     # Check if id has 2/3 >, add to block
-    pass
+    # Placeholder Expected Input: {"pool_id": "2", "response": "yes"}
+    # Process Json to Consensus Model Object
+    resp = request.get_json()
+    consesus = convert_to_consesus(resp, request.remote_addr)
+    if consesus is None:
+        # TODO return error code
+        return {"error": "very true"}
+
+    # Check Timeout
+    pool = Pool.query.filter_by(id=consesus.pool_id).first()
+    response_timestamp = pool.sendout_time
+    if (response_timestamp + datetime.timedelta(seconds=TIMEOUT)) >= datetime.datetime.now():
+        # Add to Consesus Table TODO Add checks
+        db.session.add(consesus)
+        db.session.commit()
+    else:
+        # Discard (TIMED OUT)
+        pass
+
+    # Check if id has 2/3 >, add to block
+    numberofpeer = len(Peers.query.all())
+    twothird = math.ceil(numberofpeer * 0.66)
+    if len(Consesus.query.filter_by(pool_id=consesus.pool_id).all()) >= twothird:
+        # Add to block TODO
+        # add_to_block()
+        print("2/3  liao")
+        pass
+
+    return {"Responding From": "/receive_response"}, STATUS_OK
 
 
 # @app.route("/getallblocks")

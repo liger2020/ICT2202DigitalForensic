@@ -2,11 +2,12 @@ import sys
 
 from flask import request
 
-from app import app, db
-from app.controller import convert_to_block
+from app import app
+from app.controller import send_block, convert_to_pool
 
 STATUS_OK = 200
 STATUS_NOT_FOUND = 404
+TIMEOUT = 3000
 
 
 @app.route("/health")
@@ -19,19 +20,17 @@ def current_health():
 
 @app.route('/receivepool', methods=['POST'])
 def receive():
+    # Process JSON to Pool Model Object
     pool_json = request.get_json()  # Convert string to json object
-    pool_json["id"]
-    resp = verify(pool_json)
-    send(resp, server)
-    #
-    #
-    #
-    return json_blocks, STATUS_OK
+    pool = convert_to_pool(pool_json)
+    if pool is None:
+        return {"Format": "Wrong"}
 
-# Server~
-@app.route('/receive')
-def receive_resp():
-    resp = request.get_json()
-    a = Block.query
-    a.id =
-    db.session.add()
+    # TODO Verification Process
+    # resp = verify(pool)
+    resp = {"pool_id": pool.id, "response": 1}  # Placeholder
+
+    # Send Response Back to Server
+    send_block(request.remote_addr, resp)
+
+    return pool.as_dict(), STATUS_OK

@@ -142,3 +142,21 @@ class Pool(db.Model):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+
+# Placeholder TODO
+class Consesus(db.Model):
+    __tablename__ = "consesus"
+    __table_args__ = {'extend_existing': True}
+
+    consesus_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    ip_address = db.Column(db.String(15), nullable=False)
+    response = db.Column(db.Boolean, nullable=False)
+    pool_id = db.Column(db.Integer, db.ForeignKey('Pool.id'))
+
+    def __init__(self, ip_address, pool_id, response):
+        self.ip_address = ip_address
+        self.response = response
+        self.pool_id = pool_id
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
