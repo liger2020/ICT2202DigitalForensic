@@ -7,9 +7,9 @@ import requests
 from flask import request, jsonify
 
 from app import app, db
-from app.controller import convert_to_block, get_live_peers, send_block, convert_to_pool, convert_to_consesus
+from app.controller import convert_to_block, get_live_peers, send_block, convert_to_pool, convert_to_consensus
 # Import module models
-from app.models import Peers, Block, Pool, Consesus
+from app.models import Peers, Block, Pool, Consensus
 
 STATUS_OK = 200
 STATUS_NOT_FOUND = 404
@@ -55,17 +55,17 @@ def receive_response():
     # Placeholder Expected Input: {"pool_id": "2", "response": "yes"}
     # Process Json to Consensus Model Object
     resp = request.get_json()
-    consesus = convert_to_consesus(resp, request.remote_addr)
-    if consesus is None:
+    consensus = convert_to_consensus(resp, request.remote_addr)
+    if consensus is None:
         # TODO return error code
         return {"error": "very true"}
 
     # Check Timeout
-    pool = Pool.query.filter_by(id=consesus.pool_id).first()
+    pool = Pool.query.filter_by(id=consensus.pool_id).first()
     response_timestamp = pool.sendout_time
     if (response_timestamp + datetime.timedelta(seconds=TIMEOUT)) >= datetime.datetime.now():
-        # Add to Consesus Table TODO Add checks
-        db.session.add(consesus)
+        # Add to consensus Table TODO Add checks
+        db.session.add(consensus)
         db.session.commit()
     else:
         # Discard (TIMED OUT)
@@ -74,7 +74,7 @@ def receive_response():
     # Check if id has 2/3 >, add to block
     numberofpeer = len(Peers.query.all())
     twothird = math.ceil(numberofpeer * 0.66)
-    if len(Consesus.query.filter_by(pool_id=consesus.pool_id).all()) >= twothird:
+    if len(consensus.query.filter_by(pool_id=consensus.pool_id).all()) >= twothird:
         # Add to block TODO
         # add_to_block()
         print("2/3  liao")
@@ -219,12 +219,7 @@ def getlastblocks():
 @app.route("/insertblock")
 def insertblock():
     blocks = [x.as_dict() for x in Block.query.all()]
-    # case_id = blocks[-1].get('id')
-    # block_number = blocks[-1].get('block_number') + 1
-    # block_hash =  blocks[-1].get('block_hash')
-    # time_stamp = blocks[-1].get('timestamp')
-    # test = Block(1, meta_data="test", log="test", status=True)
-    test = Pool(1, meta_data="test", log="test")
+    test = Consensus(1, meta_data="test", log="test")
     db.session.add(test)
     db.session.commit()
 

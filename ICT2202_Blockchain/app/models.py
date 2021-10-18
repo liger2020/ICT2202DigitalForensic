@@ -144,19 +144,24 @@ class Pool(db.Model):
 
 
 # Placeholder TODO
-class Consesus(db.Model):
-    __tablename__ = "consesus"
+class Consensus(db.Model):
+    __tablename__ = "consensus"
     __table_args__ = {'extend_existing': True}
 
-    consesus_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    consensus_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ip_address = db.Column(db.String(15), nullable=False)
-    response = db.Column(db.Boolean, nullable=False)
     pool_id = db.Column(db.Integer, db.ForeignKey('Pool.id'))
+    response = db.Column(db.Boolean, nullable=False)
+    receive_timestamp = db.Column(db.DateTime, nullable=True) 
 
     def __init__(self, ip_address, pool_id, response):
         self.ip_address = ip_address
-        self.response = response
         self.pool_id = pool_id
+        self.response = response
+        self.receive_timestamp = datetime.now()
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
+db.create_all()

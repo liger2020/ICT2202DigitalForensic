@@ -6,7 +6,7 @@ from datetime import datetime
 import requests
 
 from app import db
-from app.models import Block, Peers, Pool, Consesus
+from app.models import Block, Peers, Pool, Consensus
 
 SYNC_INTERVAL = 60 * 10  # 10 Mins
 
@@ -51,10 +51,10 @@ def convert_to_pool(json_block):
         return None
 
 # Placeholder TODO
-def convert_to_consesus(json_block, ip_address):
+def convert_to_consensus(json_block, ip_address):
     try:
-        consesus = Consesus(ip_address, json_block["pool_id"], json_block["response"])
-        return consesus
+        consensus = Consensus(ip_address, json_block["pool_id"], json_block["response"], json_block["receive_timestamp"])
+        return consensus
     except KeyError:
         return None
     except TypeError:
@@ -121,21 +121,8 @@ def randomselect():
 
 
 def verify():
-    chosen_ones = randomselect()
-    send_unverified_block()
-    #how to send to the user? 
-    blocks = [x.as_dict() for x in Block.query.all()]
-    last_block = blocks[-1].get('block_hash')
-    case_id = blocks[-1].get('id')
-
-    # Check if last block's hash matches user's
-    if case_id == 1:  # Let the value 1 be case id value stored in user side.
-        if last_block == "123":  # Let 123 be last block hash stored in user side.
-            print("Yes")  # consensus is send to the speaker
-        else:
-            print("No")  # consensus is send to the speaker
-    else:
-        None
+    blocks = [x.as_dict() for x in Consensus.query.order_by('pool_id')]
+    print(blocks)
 
 
 def sync_schedule():
@@ -181,27 +168,27 @@ def send_unverified_block():
     pool = ThreadPoolExecutor(5)  # 5 Worker Threads
     for unverified_block in list_of_unverified:
         block = convert_to_pool(unverified_block)
-        #data = block.case_id, block.meta_data, block.log, block.previous_block_hash, block.block_hash
+        data = block.case_id, block.meta_data, block.log, block.previous_block_hash, block.block_hash
         count = block.count
         print(block.sendout_time)
         if block.sendout_time is None:        
-            block.sendout_time = datetime.now()
+            block.sendout_time = datetime.now()         
             db.session.commit()
-            print(block.sendout_time)
-            # for peer in list_of_users:
-            #     futures.append(pool.submit(send_block, peer, data)) #send block to user
+            for peer in list_of_users:
+                 futures.append(pool.submit(send_block, peer, data)) #send block to user
             #check if user belong to case (dk how to check)
             count += 1 #increment count 
         else:
-            pass 
-            #
+            if count < 4:
+                count += 1
+                block.sendout_time = datetime.now()         
+                db.session.commit()
+                for peer in list_of_users:
+                    futures.append(pool.submit(send_block, peer, data))
+            
     #     If send_timestamp is not None, send_timestamp + TIMEOUT <= date.now(), count += 1;
-    db.session.commit()
-        # Send to user
-        # futures.append(pool.submit(send_block, peer, data))
-        # unveri set send send_timestamp
 
 
-send_unverified_block()
-# verify()
+#send_unverified_block()
+verify()
 # randomselect()
