@@ -120,11 +120,6 @@ def randomselect():
     return delegates  # List of user to give their consensus.
 
 
-def verify():
-    blocks = [x.as_dict() for x in Consensus.query.order_by('pool_id')]
-    print(blocks)
-
-
 def sync_schedule():
     live_peers = get_live_peers()
     for peer in live_peers:
@@ -163,32 +158,36 @@ def sync_schedule():
 def send_unverified_block():
     # Every 10 Second
     futures = []
-    list_of_unverified = [x.as_dict() for x in Pool.query.order_by('case_id')]
+    list_of_unverified = Pool.query.order_by('case_id').all()
     list_of_users = randomselect()
     pool = ThreadPoolExecutor(5)  # 5 Worker Threads
-    for unverified_block in list_of_unverified:
-        block = convert_to_pool(unverified_block)
+    for block in list_of_unverified:
         data = block.case_id, block.meta_data, block.log, block.previous_block_hash, block.block_hash
-        count = block.count
         print(block.sendout_time)
         if block.sendout_time is None:        
-            block.sendout_time = datetime.now()         
-            db.session.commit()
-            for peer in list_of_users:
-                 futures.append(pool.submit(send_block, peer, data)) #send block to user
+            block.sendout_time = datetime.now()     
+            print(block.sendout_time)    
+            
+            # for peer in list_of_users:
+            #      futures.append(pool.submit(send_block, peer, data)) #send block to user
             #check if user belong to case (dk how to check)
-            count += 1 #increment count 
+            block.count += 1 #increment count 
+            db.session.commit()
         else:
-            if count < 4:
-                count += 1
+            if block.count < 4:
+                block.count += 1
                 block.sendout_time = datetime.now()         
                 db.session.commit()
-                for peer in list_of_users:
-                    futures.append(pool.submit(send_block, peer, data))
+                # for peer in list_of_users:
+                #     futures.append(pool.submit(send_block, peer, data))
             
     #     If send_timestamp is not None, send_timestamp + TIMEOUT <= date.now(), count += 1;
 
+def verify():
+    blocks = [x.as_dict() for x in Consensus.query.order_by('pool_id')]
+    print(blocks)
 
-#send_unverified_block()
-verify()
+    
+send_unverified_block()
+#verify()
 # randomselect()
