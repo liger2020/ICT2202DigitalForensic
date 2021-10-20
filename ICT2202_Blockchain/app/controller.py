@@ -9,7 +9,7 @@ from app import db
 from app.models import Block, Peers, Pool, Consensus
 
 SYNC_INTERVAL = 60 * 10  # 10 Mins
-
+TIMEOUT = 30
 
 def convert_to_block(json_block):
     try:
@@ -93,8 +93,8 @@ def get_live_peers():
     return live_peers
 
 
-def send_block(peer, data):
-    url = "http://{}:{}/receiveblock".format(peer.ip_address, peer.port)
+def send_block(peer, data, url):
+    url = "http://{}:{}/{}".format(peer.ip_address, peer.port, url)
     r = requests.post(url, json=data)
     output = {"Peer": url,
               "Answer": r.json(),
@@ -102,6 +102,8 @@ def send_block(peer, data):
               }
 
     return output
+
+
 
 
 '''
@@ -166,26 +168,29 @@ def send_unverified_block():
         print(block.sendout_time)
         if block.sendout_time is None:        
             block.sendout_time = datetime.now()     
-            print(block.sendout_time)    
-            
             # for peer in list_of_users:
-            #      futures.append(pool.submit(send_block, peer, data)) #send block to user
+            #      futures.append(pool.submit(send_block, peer, data, "receivepool")) #send block to user
             #check if user belong to case (dk how to check)
             block.count += 1 #increment count 
             db.session.commit()
         else:
             if block.count < 4:
                 block.count += 1
-                block.sendout_time = datetime.now()         
-                db.session.commit()
+                if (block.sendout_time + datetime.timedelta(seconds=TIMEOUT)) >= datetime.datetime.now():
+                    block.sendout_time = datetime.now()         
+                    db.session.commit()
                 # for peer in list_of_users:
-                #     futures.append(pool.submit(send_block, peer, data))
+                #     futures.append(pool.submit(send_block, peer, data, "receivepool"))
+            else:
+                db.sesssion.delete(block)
+                consensus_list = Consensus.query.filter_by(pool_id=block.id).all()
+                for remove_consensus in consensus_list:
+                    db.sesssion.delete(remove_consensus)
+                db.session.commit()
             
     #     If send_timestamp is not None, send_timestamp + TIMEOUT <= date.now(), count += 1;
 
-def verify():
-    blocks = [x.as_dict() for x in Consensus.query.order_by('pool_id')]
-    print(blocks)
+
 
     
 send_unverified_block()

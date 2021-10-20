@@ -216,16 +216,6 @@ def getlastblocks():
     return jsonify(output=blocks), STATUS_OK
 
 
-@app.route("/insertblock")
-def insertblock():
-    blocks = [x.as_dict() for x in Block.query.all()]
-    test = Consensus(1, meta_data="test", log="test")
-    db.session.add(test)
-    db.session.commit()
-
-    return jsonify(output=test), STATUS_OK
-
-
 @app.route("/query")
 def check_query():
     queries = Block.query.filter_by(id=1).all()

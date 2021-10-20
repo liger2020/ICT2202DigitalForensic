@@ -1,9 +1,9 @@
 import sys
 
-from flask import request
-
-from app import app
+from flask import request, jsonify
+from app import app, db
 from app.controller import send_block, convert_to_pool
+from app.models import Pool
 
 STATUS_OK = 200
 STATUS_NOT_FOUND = 404
@@ -34,3 +34,12 @@ def receive():
     send_block(request.remote_addr, resp)
 
     return pool.as_dict(), STATUS_OK
+
+
+@app.route('/send_block', methods=['POST'])
+def send():
+    test = Pool(1, meta_data="test", log="test")
+    db.session.add(test)
+    db.session.commit()
+
+    return jsonify(output=test), STATUS_OK
