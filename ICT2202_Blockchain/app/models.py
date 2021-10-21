@@ -1,6 +1,9 @@
-from app import db
+from app import db, app
 import hashlib
 from datetime import datetime
+from itsdangerous import (TimedJSONWebSignatureSerializer
+                          as Serializer, BadSignature, SignatureExpired)
+from passlib.apps import custom_app_context as pwd_context
 
 
 class Base(db.Model):
@@ -57,7 +60,7 @@ class Block(db.Model):
         self.block_data = "-".join(meta_data) + "-".join(log) + "-" + str(self.timestamp) \
                           + "-" + self.previous_block_hash
         self.block_hash = hashlib.sha256(self.block_data.encode()).hexdigest()
-        self.status = False 
+        self.status = False
 
     def __repr__(self):
         return "id: {}\nblock_number: {}\nprevious_block_hash: {}\nmeta_data: {}\nlog: " \
@@ -78,7 +81,7 @@ class Block(db.Model):
             self.block_number = 0
             self.previous_block_hash = str("")
         else:
-            self.block_number = result.block_number+1
+            self.block_number = result.block_number + 1
             self.previous_block_hash = result.block_hash
 
 
@@ -106,13 +109,13 @@ class Pool(db.Model):
         :param meta_data: this refers to whatever information we want to put in. can give json format or just str.
         """
 
-        self.case_id = case_id 
+        self.case_id = case_id
         self.set_block_number()
 
         self.meta_data = meta_data
         self.log = log
         self.timestamp = datetime.now()
-        self.block_data = "-".join(meta_data) + "-".join(log) + "-" +  str(self.timestamp) \
+        self.block_data = "-".join(meta_data) + "-".join(log) + "-" + str(self.timestamp) \
                           + "-" + self.previous_block_hash
         self.block_hash = hashlib.sha256(self.block_data.encode()).hexdigest()
         self.status = False
@@ -122,13 +125,13 @@ class Pool(db.Model):
     def __repr__(self):
         return "case_id: {}\nblock_number: {}\nprevious_block_hash: {}\nmeta_data: {}\nlog: " \
                "{}\ntimestamp: {}\nblock_hash: {}\nstatus: {}\ncount:".format(self.case_id,
-                                                                    self.block_number,
-                                                                      self.previous_block_hash,
-                                                                      self.meta_data, self.log,
-                                                                      self.timestamp,
-                                                                      self.block_hash,
-                                                                      self.status,
-                                                                      self.count)
+                                                                              self.block_number,
+                                                                              self.previous_block_hash,
+                                                                              self.meta_data, self.log,
+                                                                              self.timestamp,
+                                                                              self.block_hash,
+                                                                              self.status,
+                                                                              self.count)
 
     def set_block_number(self):
         result = Block.query.filter_by(id=self.case_id).order_by(Block.block_number.desc()).first()
@@ -136,7 +139,7 @@ class Pool(db.Model):
             self.block_number = 0
             self.previous_block_hash = str("")
         else:
-            self.block_number = result.block_number+1
+            self.block_number = result.block_number + 1
             self.previous_block_hash = result.block_hash
 
     def as_dict(self):
@@ -152,7 +155,7 @@ class Consensus(db.Model):
     ip_address = db.Column(db.String(15), nullable=False)
     pool_id = db.Column(db.Integer, db.ForeignKey('Pool.id'))
     response = db.Column(db.Boolean, nullable=False)
-    receive_timestamp = db.Column(db.DateTime, nullable=True) 
+    receive_timestamp = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, ip_address, pool_id, response):
         self.ip_address = ip_address
@@ -162,6 +165,35 @@ class Consensus(db.Model):
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(32), index=True)
+    password_hash = db.Column(db.String(128))
+
+    def hash_password(self, password):
+        self.password_hash = pwd_context.encrypt(password)
+
+    def verify_password(self, password):
+        return pwd_context.verify(password, self.password_hash)
+
+    def generate_auth_token(self, expiration=600):
+        s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
+        return s.dumps({'id': self.id})
+
+    @staticmethod
+    def verify_auth_token(token):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except SignatureExpired:
+            return None  # valid token, but expired
+        except BadSignature:
+            return None  # invalid token
+        user = User.query.get(data['id'])
+        return user
 
 
 db.create_all()

@@ -182,10 +182,10 @@ def send_unverified_block():
                 # for peer in list_of_users:
                 #     futures.append(pool.submit(send_block, peer, data, "receivepool"))
             else:
-                db.sesssion.delete(block)
+                db.session.delete(block)
                 consensus_list = Consensus.query.filter_by(pool_id=block.id).all()
                 for remove_consensus in consensus_list:
-                    db.sesssion.delete(remove_consensus)
+                    db.session.delete(remove_consensus)
                 db.session.commit()
             
     #     If send_timestamp is not None, send_timestamp + TIMEOUT <= date.now(), count += 1;
