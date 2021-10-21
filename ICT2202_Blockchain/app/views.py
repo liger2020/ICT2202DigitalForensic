@@ -32,6 +32,7 @@ def current_health():
 # Assuming unverified
 @app.route('/receiveblock', methods=['POST'])
 def receive_block():
+    @auth.login_required
     # For Info
     num_of_errors = 0
 
@@ -57,6 +58,7 @@ def receive_block():
 
 @app.route('/receive_response', methods=['POST'])
 def receive_response():
+    @auth.login_required
     # Placeholder Expected Input: {"pool_id": "2", "response": "yes"}
     # Process Json to Consensus Model Object
     resp = request.get_json()
@@ -123,6 +125,7 @@ def receive_response():
 
 
 @app.route('/sync')
+@auth.login_required
 def sync():
     output = []
     id_list = Block.query.with_entities(Block.id).distinct()
@@ -135,6 +138,7 @@ def sync():
 
 # Syncing blockchain, request length of id, if longer send all blocks above length (Honestly cutting corners here)
 @app.route('/sync', methods=['POST'])
+@auth.login_required
 def sync_receive():
     resp = request.get_json()
     # Make sure json is valid
