@@ -4,7 +4,7 @@ from datetime import datetime
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 from passlib.apps import custom_app_context as pwd_context
-
+ 
 
 class Base(db.Model):
     __abstract__ = True
@@ -194,6 +194,21 @@ class User(db.Model):
             return None  # invalid token
         user = User.query.get(data['id'])
         return user
+
+# class User_stored_info(db.Model):
+#     __tablename__ = "user_stored_info"
+#     __table_args__ = {'extend_existing': True}
+
+#     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     case_id = db.Column(db.String(15), nullable=False)
+#     last_verified_hash = db.Column(db.String(255))
+
+#     def __init__(self, case_id, last_verified_hash):
+#         self.case_id = case_id
+#         self.last_verified_hash = last_verified_hash
+
+#     def as_dict(self):
+#         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 db.create_all()

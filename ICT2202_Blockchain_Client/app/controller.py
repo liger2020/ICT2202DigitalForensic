@@ -3,9 +3,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 from dateutil import parser
-
+import hashlib
 from app import db
-from app.models import Pool, Peers, Block
+from app.models import Pool, Peers, Block, User_stored_info
 
 
 def check_health(peer):
@@ -127,3 +127,15 @@ def send_sync(peer):
                     original_block.block_hash = block.block_hash
                     original_block.length = block.length
             db.session.commit()
+
+def verify(unverified_block):
+    #unverified block is in json format
+    user_block_info = User_stored_info.query.filter_by(case_id=unverified_block.case_id)
+    if user_block_info.last_verified_hash == unverified_block.previous_block_hash:
+        verifying = "-".join(unverified_block.meta_data) + "-".join(unverified_block.log) + "-" + str(unverified_block.timestamp) \
+                          + "-" + user_block_info.last_verified_hash
+        verify_block_hash = hashlib.sha256(verifying.encode()).hexdigest()  
+        if verify_block_hash == unverified_block.block_hash:
+            return True
+        else:
+            return False

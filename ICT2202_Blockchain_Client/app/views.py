@@ -2,7 +2,7 @@ import sys
 
 from flask import request, jsonify
 from app import app, db
-from app.controller import send_block, convert_to_pool
+from app.controller import send_block, convert_to_pool, verify
 from app.models import Pool
 
 STATUS_OK = 200
@@ -27,8 +27,8 @@ def receive():
         return {"Format": "Wrong"}
 
     # TODO Verification Process
-    # resp = verify(pool)
-    resp = {"pool_id": pool.id, "response": 1}  # Placeholder
+    verified = verify(pool)
+    resp = {"pool_id": pool.id, "response": verified}  # Placeholder
 
     # Send Response Back to Server
     send_block(request.remote_addr, resp)
