@@ -5,9 +5,19 @@ from app import app, db
 from app.controller import send_block, convert_to_pool, verify
 from app.models import Pool
 
+from flask import Flask, g
+from flask_httpauth import HTTPTokenAuth
+
 STATUS_OK = 200
 STATUS_NOT_FOUND = 404
 TIMEOUT = 3000
+app = Flask(__name__)
+auth = HTTPTokenAuth(scheme='Bearer')
+
+tokens = {
+    "secret-token-1": "john",
+    "secret-token-2": "susan"
+}
 
 
 @app.route("/health")
@@ -44,3 +54,16 @@ def send():
     db.session.commit()
 
     return jsonify(output=test), STATUS_OK
+
+
+@auth.verify_token
+def verify_token(token):
+    if token in tokens:
+        return tokens[token]
+
+
+@app.route('/api/test')
+@auth.login_required
+def index():
+    return "Hello, {}!".format(auth.current_user())
+

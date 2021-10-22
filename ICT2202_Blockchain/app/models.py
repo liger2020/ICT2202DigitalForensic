@@ -172,6 +172,8 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(32), index=True)
     password_hash = db.Column(db.String(128))
+    ip_address = db.Column(db.String(128),nullable=True)
+    token = db.Column(db.String(128), nullable=True)
 
     def hash_password(self, password):
         self.password_hash = pwd_context.encrypt(password)
@@ -179,8 +181,10 @@ class User(db.Model):
     def verify_password(self, password):
         return pwd_context.verify(password, self.password_hash)
 
-    def generate_auth_token(self, expiration=600):
-        s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
+    def generate_auth_token(self):
+        s = Serializer(app.config['SECRET_KEY'])
+        token= s.dumps({'id': self.id})
+        self.token = token.decode('ascii')
         return s.dumps({'id': self.id})
 
     @staticmethod

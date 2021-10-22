@@ -11,6 +11,7 @@ from app.models import Block, Peers, Pool, Consensus
 SYNC_INTERVAL = 60 * 10  # 10 Mins
 TIMEOUT = 30
 
+
 def convert_to_block(json_block):
     try:
         block = Block(json_block["id"], json_block["meta_data"], json_block["log"])
@@ -50,15 +51,18 @@ def convert_to_pool(json_block):
     except KeyError:
         return None
 
+
 # Placeholder TODO
 def convert_to_consensus(json_block, ip_address):
     try:
-        consensus = Consensus(ip_address, json_block["pool_id"], json_block["response"], json_block["receive_timestamp"])
+        consensus = Consensus(ip_address, json_block["pool_id"], json_block["response"],
+                              json_block["receive_timestamp"])
         return consensus
     except KeyError:
         return None
     except TypeError:
         return None
+
 
 def check_health(peer):
     try:
@@ -102,8 +106,6 @@ def send_block(peer, data, url):
               }
 
     return output
-
-
 
 
 '''
@@ -157,6 +159,7 @@ def sync_schedule():
                     db.session.add(block)
                 db.session.commit()
 
+
 def send_unverified_block():
     # Every 10 Second
     futures = []
@@ -191,16 +194,15 @@ def send_unverified_block():
                         raise
                     finally:
                         db.session.close()
-                    
+
             else:
                 db.session.delete(block)
                 consensus_list = Consensus.query.filter_by(pool_id=block.id).all()
                 for remove_consensus in consensus_list:
                     db.session.delete(remove_consensus)
                 db.session.commit()
-            
-    #     If send_timestamp is not None, send_timestamp + TIMEOUT <= date.now(), count += 1;
 
+    #     If send_timestamp is not None, send_timestamp + TIMEOUT <= date.now(), count += 1;
 
 
     
