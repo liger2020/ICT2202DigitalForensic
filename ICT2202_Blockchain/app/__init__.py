@@ -1,12 +1,9 @@
-import os
+import atexit
 
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask
 from flask_httpauth import HTTPBasicAuth
 from flask_sqlalchemy import SQLAlchemy
-from flask_apscheduler import APScheduler
-from apscheduler.schedulers.background import BackgroundScheduler
-import atexit
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
@@ -25,10 +22,6 @@ session_factory = sessionmaker(bind=engine)
 Session = scoped_session(session_factory)
 
 from app.controller import sync_schedule, send_unverified_block, check_twothird
-
-scheduler = APScheduler()
-scheduler.init_app(app)
-scheduler.start()
 
 bg_scheduler = BackgroundScheduler()
 # bg_scheduler.add_job(func=sync_schedule, trigger="interval", seconds=30)
