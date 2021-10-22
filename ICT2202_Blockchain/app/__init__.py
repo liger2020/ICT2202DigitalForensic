@@ -19,13 +19,12 @@ app.config.from_object('config')
 auth = HTTPBasicAuth()
 db = SQLAlchemy(app)
 
-# Test
-BASE_DIR = "C:\\Users\\Wolf\\Dropbox\\My PC (Wolf)\\Documents\\GitHub\\ICT2202DigitalForensic\\ICT2202_Blockchain"
-engine = create_engine('sqlite:///' + os.path.join(BASE_DIR, 'app.db'))
+# Using SQLAlchemy ORM for Session
+engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
 session_factory = sessionmaker(bind=engine)
 Session = scoped_session(session_factory)
 
-from app.controller import sync_schedule, send_unverified_block
+from app.controller import sync_schedule, send_unverified_block, check_twothird
 
 scheduler = APScheduler()
 scheduler.init_app(app)
@@ -34,6 +33,7 @@ scheduler.start()
 bg_scheduler = BackgroundScheduler()
 # bg_scheduler.add_job(func=sync_schedule, trigger="interval", seconds=30)
 bg_scheduler.add_job(func=send_unverified_block, trigger="interval", seconds=10)
+bg_scheduler.add_job(func=check_twothird, trigger="interval", seconds=10)
 bg_scheduler.start()
 
 from app import views

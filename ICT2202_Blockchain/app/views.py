@@ -25,7 +25,7 @@ def current_health():
 
 # Assuming unverified
 @app.route('/receiveblock', methods=['POST'])
-# @auth.login_required
+@auth.login_required
 def receive_block():
     num_of_errors = 0
 
@@ -62,23 +62,15 @@ def receive_response():
 
     # Check Timeout
     pool = Pool.query.filter_by(id=consensus.pool_id).first()
-    response_timestamp = pool.sendout_time
-    if (response_timestamp + datetime.timedelta(seconds=TIMEOUT)) >= datetime.datetime.now():
-        # Add to consensus Table TODO Add checks
-        db.session.add(consensus)
-        db.session.commit()
-    else:
-        # Discard (TIMED OUT)
-        pass
-
-    # Check if id has 2/3 >, add to block
-    numberofpeer = len(Peers.query.all())
-    twothird = math.ceil(numberofpeer * 0.66)
-    if len(consensus.query.filter_by(pool_id=consensus.pool_id).all()) >= twothird:
-        # Add to block TODO
-        # add_to_block()
-        print("2/3  liao")
-        pass
+    if pool is not None:
+        response_timestamp = pool.sendout_time
+        if (response_timestamp + datetime.timedelta(seconds=TIMEOUT)) >= datetime.datetime.now():
+            # Add to consensus Table TODO Add checks
+            db.session.add(consensus)
+            db.session.commit()
+        else:
+            # Discard (TIMED OUT)
+            pass
 
     return {"Responding From": "/receive_response"}, STATUS_OK
 

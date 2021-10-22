@@ -1,13 +1,15 @@
+import json
+
 from dateutil import parser
 import math
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 import requests
+from flask import jsonify
 
 from app import db, app, Session
 from app.models import Block, Peers, Pool, Consensus
-
 
 SYNC_INTERVAL = 60 * 10  # 10 Mins
 TIMEOUT = 30
@@ -56,8 +58,7 @@ def convert_to_pool(json_block):
 # Placeholder TODO
 def convert_to_consensus(json_block, ip_address):
     try:
-        consensus = Consensus(ip_address, json_block["pool_id"], json_block["response"],
-                              json_block["receive_timestamp"])
+        consensus = Consensus(ip_address, json_block["pool_id"], json_block["response"])
         return consensus
     except KeyError:
         return None
@@ -99,9 +100,9 @@ def get_live_peers():
 
 
 def send_block(peer, data, url):
-    print("http://{}:{}/{}\n{}".format(peer.ip_address, peer.port, url, data))
     url = "http://{}:{}/{}".format(peer.ip_address, peer.port, url)
-    r = requests.post(url, json=data)
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    r = requests.post(url, json=data, headers=headers, timeout=3)
     output = {"Peer": url,
               "Answer": r.json(),
               "Status_Code": r.status_code
@@ -163,43 +164,64 @@ def sync_schedule():
 
 
 # !!! Native SQLAlchemy Syntax !!!
+def check_twothird():
+    session = Session()
+
+    # Get all Unverified Blocks
+    pool_list = session.query(Pool).all()
+    for pool in pool_list:
+        if pool.sendout_time is None:
+            continue
+
+        # If Unverified block Timed Out, Check all response to check if 2/3
+        if pool.sendout_time + timedelta(seconds=TIMEOUT) >= datetime.now():
+            # Check if id has 2/3 >, add to block
+            numberofpeer = len(Peers.query.all())
+            twothird = math.ceil(numberofpeer * 0.66)
+            consensus_list = Consensus.query.filter_by(pool_id=pool.id).all()
+            number_of_agree = [x for x in consensus_list if x.response]
+            if len(number_of_agree) >= twothird:
+                # Add to block TODO
+                # add_to_block()
+                print("2/3  liao")
+                # TODO check log action add user
+
+    Session.remove()
+
+
+# !!! Native SQLAlchemy Syntax !!!
 def send_unverified_block():
-    # TODO Solve sending twice problem
-    print("\nRUN", datetime.now())
     session = Session()
 
     # Every 10 Second
-    futures = []
     list_of_unverified = session.query(Pool).order_by(Pool.case_id).all()
     list_of_users = randomselect()
-    print("Length:", len(list_of_users))
-    pool = ThreadPoolExecutor(5)  # 5 Worker Threads
+    thread_pool = ThreadPoolExecutor(5)  # 5 Worker Threads
     for block in list_of_unverified:
-        data = {"case_id": block.case_id, "meta_data": block.meta_data, "log": block.log, "timestamp": block.timestamp, "previous_block_hash": block.previous_block_hash, "block_hash": block.block_hash}
-        print("SENDOUT TIME:", block.sendout_time)
+        data = {"Pool": [{"id": block.id, "case_id": block.case_id, "meta_data": block.meta_data, "log": block.log,
+                          "timestamp": str(block.timestamp),
+                          "previous_block_hash": block.previous_block_hash, "block_hash": block.block_hash}]
+                }
         if block.sendout_time is None:
-            print("IF")
             block.sendout_time = datetime.now()
-            block.count += 1  # increment count
+            block.count = 0
             session.commit()
             for peer in list_of_users:
-                futures.append(pool.submit(send_block, peer, data, "receivepool"))  # send block to user
+                thread_pool.submit(send_block, peer, data, "receivepool")  # send block to user
         else:
-            print("ELSE")
-            if block.count < 4:
-                block.count += 1
-                if (block.sendout_time + timedelta(seconds=TIMEOUT)) >= datetime.now():
+            if block.count < 3:
+                block.count += 1  # increment count
+                if (block.sendout_time + timedelta(seconds=TIMEOUT)) <= datetime.now():
                     block.sendout_time = datetime.now()
-                    print("ELSE:", block.sendout_time)
                     session.commit()
 
                     for peer in list_of_users:
-                        futures.append(pool.submit(send_block, peer, data, "receivepool"))  # send block to user
+                        thread_pool.submit(send_block, peer, data, "receivepool")  # send block to user
             else:
                 session.delete(block)
                 consensus_list = session.query(Consensus).filter(Consensus.pool_id == block.id).all()
                 for remove_consensus in consensus_list:
-                    db.session.delete(remove_consensus)
+                    session.delete(remove_consensus)
                 session.commit()
 
     Session.remove()
