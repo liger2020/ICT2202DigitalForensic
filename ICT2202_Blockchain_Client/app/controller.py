@@ -65,6 +65,7 @@ def convert_to_block(json_block):
 
 def convert_to_pool(json_block):
     try:
+        print(json_block["id"], json_block["meta_data"], json_block["log"])
         pool = Pool(json_block["id"], json_block["meta_data"], json_block["log"])
         if "block_number" in json_block and "previous_block_hash" in json_block and "timestamp" in json_block and "block_hash" in json_block:
             pool.id = json_block["id"]
@@ -81,6 +82,8 @@ def convert_to_pool(json_block):
             pool.status = json_block["status"]
         return pool
     except KeyError:
+        return None
+    except TypeError:
         return None
 
 
