@@ -31,9 +31,8 @@ def current_health():
 
 # Assuming unverified
 @app.route('/receiveblock', methods=['POST'])
+@auth.login_required
 def receive_block():
-    # @auth.login_required
-    # For Info
     num_of_errors = 0
 
     # Check block need verify
