@@ -43,7 +43,8 @@ def get_live_peers():
 
 def send_block(ip_address, data):
     url = "http://{}:5000/receive_response".format(ip_address)
-    r = requests.post(url, json=data)
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    r = requests.post(url, json=data, headers=headers, timeout=1)
     try:
         output = {"Peer": url,
                   "Answer": r.json(),
@@ -65,13 +66,8 @@ def convert_to_user_stored_info(json_block):
 
 def convert_to_pool(json_block):
     try:
-        pool = Pool(json_block["case_id"], json_block["meta_data"], json_block["log"], json_block["timestamp"],
+        pool = Pool(json_block["id"], json_block["case_id"], json_block["meta_data"], json_block["log"], parser.parse(json_block["timestamp"]),
                     json_block["previous_block_hash"], json_block["block_hash"])
-        if isinstance(json_block["timestamp"], str):
-            pool.timestamp = parser.parse(json_block["timestamp"])
-        else:
-            pool.timestamp = json_block["timestamp"]
-        pool.block_hash = json_block["block_hash"]
         return pool
     except KeyError:
         return None

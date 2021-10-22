@@ -4,6 +4,7 @@ from flask import request, jsonify
 from app import app, db, auth
 from app.controller import send_block, convert_to_pool, verify
 from app.models import Pool
+from concurrent.futures import ThreadPoolExecutor
 from flask import Flask, g
 from flask_httpauth import HTTPTokenAuth
 
@@ -27,22 +28,25 @@ def current_health():
 
 @app.route('/receivepool', methods=['POST'])
 def receive():
+    thread_pool = ThreadPoolExecutor(5)  # 5 Worker Threads
+
     # Process JSON to Pool Model Object
     pool_json = request.get_json()  # Convert string to json object
     for x in pool_json["Pool"]:
         pool = convert_to_pool(x)
-
         if pool is None:
             return {"Format": "Wrong"}
 
-        # TODO Verification Process
-        verified = verify(pool)
+        # verified = verify(pool)
+        # print("AFTER VERIFY", verified)
+        # TODO VERIFY RETURNING NONE
+        verified = 1
         resp = {"pool_id": pool.id, "response": verified}  # Placeholder
 
         # Send Response Back to Server
-        send_block(request.remote_addr, resp)
+        thread_pool.submit(send_block, request.remote_addr, resp)  # send block to user
 
-        return pool.as_dict(), STATUS_OK
+        return "Lol", STATUS_OK
 
 
 @app.route('/send_block')
