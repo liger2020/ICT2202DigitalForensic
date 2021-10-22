@@ -5,7 +5,7 @@ import requests
 from dateutil import parser
 import hashlib
 from app import db
-from app.models import Pool, Peers, Block, User_stored_info
+from app.models import Pool, Peers, User_stored_info
 
 
 def check_health(peer):
@@ -55,9 +55,9 @@ def send_block(ip_address, data):
         return {"Error": "True"}
 
 
-def convert_to_block(json_block):
+def convert_to_user_stored_info(json_block):
     try:
-        block = Block(json_block["id"], json_block["block_hash"], json_block["block_number"] + 1)
+        block = User_stored_info(json_block["id"], json_block["block_hash"], json_block["block_number"] + 1)
         return block
     except KeyError:
         return None
@@ -65,21 +65,13 @@ def convert_to_block(json_block):
 
 def convert_to_pool(json_block):
     try:
-        print(json_block["id"], json_block["meta_data"], json_block["log"])
-        pool = Pool(json_block["id"], json_block["meta_data"], json_block["log"])
-        if "block_number" in json_block and "previous_block_hash" in json_block and "timestamp" in json_block and "block_hash" in json_block:
-            pool.id = json_block["id"]
-            pool.case_id = json_block["case_id"]
-            pool.block_number = json_block["block_number"]
-            pool.previous_block_hash = json_block["previous_block_hash"]
-            pool.meta_data = json_block["meta_data"]
-            pool.log = json_block["log"]
-            if isinstance(json_block["timestamp"], str):
-                pool.timestamp = parser.parse(json_block["timestamp"])
-            else:
-                pool.timestamp = json_block["timestamp"]
-            pool.block_hash = json_block["block_hash"]
-            pool.status = json_block["status"]
+        pool = Pool(json_block["case_id"], json_block["meta_data"], json_block["log"], json_block["timestamp"],
+                    json_block["previous_block_hash"], json_block["block_hash"])
+        if isinstance(json_block["timestamp"], str):
+            pool.timestamp = parser.parse(json_block["timestamp"])
+        else:
+            pool.timestamp = json_block["timestamp"]
+        pool.block_hash = json_block["block_hash"]
         return pool
     except KeyError:
         return None
@@ -114,7 +106,7 @@ def send_sync(peer):
             continue
 
         case_id = length_json["id"]
-        original_block = Block.query.filter_by(id=case_id).first()
+        original_block = User_stored_info.query.filter_by(id=case_id).first()
         # Check if longer
         if length_json["length"] <= original_block.length:
             continue
@@ -125,19 +117,21 @@ def send_sync(peer):
         if resp.status_code == 200:
             resp_json = resp.json()
             for block_json in resp_json["Blocks"]:
-                block = convert_to_block(block_json)
+                block = convert_to_user_stored_info(block_json)
                 if block is not None:
                     original_block.block_hash = block.block_hash
                     original_block.length = block.length
             db.session.commit()
 
+
 def verify(unverified_block):
-    #unverified block is in json format
-    user_block_info = User_stored_info.query.filter_by(case_id=unverified_block.case_id)
+    # unverified block is in json format
+    user_block_info = User_stored_info.query.filter_by(case_id=unverified_block.case_id).first_or_404()
     if user_block_info.last_verified_hash == unverified_block.previous_block_hash:
-        verifying = "-".join(unverified_block.meta_data) + "-".join(unverified_block.log) + "-" + str(unverified_block.timestamp) \
-                          + "-" + user_block_info.last_verified_hash
-        verify_block_hash = hashlib.sha256(verifying.encode()).hexdigest()  
+        verifying = "-".join(unverified_block.meta_data) + "-".join(unverified_block.log) + "-" + str(
+            unverified_block.timestamp) \
+                    + "-" + user_block_info.last_verified_hash
+        verify_block_hash = hashlib.sha256(verifying.encode()).hexdigest()
         if verify_block_hash == unverified_block.block_hash:
             return True
         else:

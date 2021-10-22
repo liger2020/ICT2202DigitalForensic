@@ -5,8 +5,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 import requests
 
-from app import db
+from app import db, app, Session
 from app.models import Block, Peers, Pool, Consensus
+
+from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import sessionmaker
 
 SYNC_INTERVAL = 60 * 10  # 10 Mins
 TIMEOUT = 30
@@ -160,11 +163,16 @@ def sync_schedule():
                 db.session.commit()
 
 
+# !!! Native SQLAlchemy Syntax !!!
 def send_unverified_block():
+    print("RUN", datetime.now())
+    session = Session()
+
     # Every 10 Second
     futures = []
-    list_of_unverified = Pool.query.order_by('case_id').all()
+    list_of_unverified = session.query(Pool).order_by(Pool.case_id).all()
     list_of_users = randomselect()
+    print("LEngtr:", len(list_of_users))
     pool = ThreadPoolExecutor(5)  # 5 Worker Threads
     for block in list_of_unverified:
         data = block.case_id, block.meta_data, block.log, block.previous_block_hash, block.block_hash
@@ -187,26 +195,20 @@ def send_unverified_block():
                 block.count += 1
                 if (block.sendout_time + timedelta(seconds=TIMEOUT)) >= datetime.now():
                     block.sendout_time = datetime.now()
-                    try:
-                        db.session.commit()
-                        for peer in list_of_users:
-                            futures.append(pool.submit(send_block, peer, data, "receivepool"))
-                    except:
-                        db.session.rollback()
-                        raise
-                    finally:
-                        db.session.close()
+                    print("ELSE:", block.sendout_time)
+                    session.commit()
 
+                    for peer in list_of_users:
+                        futures.append(pool.submit(send_block, peer, data, "receivepool"))  # send block to user
             else:
-                db.session.delete(block)
-                consensus_list = Consensus.query.filter_by(pool_id=block.id).all()
+                session.delete(block)
+                consensus_list = session.query(Consensus).filter(Consensus.pool_id == block.id).all()
                 for remove_consensus in consensus_list:
                     db.session.delete(remove_consensus)
-                db.session.commit()
+                session.commit()
 
-    #     If send_timestamp is not None, send_timestamp + TIMEOUT <= date.now(), count += 1;
+    Session.remove()
 
-
-send_unverified_block()
+# send_unverified_block()
 # verify()
 # randomselect()

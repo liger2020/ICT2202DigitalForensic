@@ -1,20 +1,14 @@
+import datetime
 import math
 import sys
-import time
-import datetime
 
-import requests
 from flask import request, jsonify, url_for, g
 from flask_restful import abort
 
-from app import app, db
-from app.controller import convert_to_block, get_live_peers, send_block, convert_to_pool, convert_to_consensus
+from app import app, db, auth
+from app.controller import convert_to_pool, convert_to_consensus
 # Import module models
 from app.models import Peers, Block, Pool, Consensus, User
-
-from flask_httpauth import HTTPBasicAuth
-
-auth = HTTPBasicAuth()
 
 STATUS_OK = 200
 STATUS_NOT_FOUND = 404
@@ -31,7 +25,7 @@ def current_health():
 
 # Assuming unverified
 @app.route('/receiveblock', methods=['POST'])
-@auth.login_required
+# @auth.login_required
 def receive_block():
     num_of_errors = 0
 

@@ -1,7 +1,7 @@
 import sys
 
 from flask import request, jsonify
-from app import app, db
+from app import app, db, auth
 from app.controller import send_block, convert_to_pool, verify
 from app.models import Pool
 from flask import Flask, g
@@ -10,7 +10,6 @@ from flask_httpauth import HTTPTokenAuth
 STATUS_OK = 200
 STATUS_NOT_FOUND = 404
 TIMEOUT = 3000
-auth = HTTPTokenAuth(scheme='Bearer')
 
 tokens = {
     "secret-token-1": "john",
@@ -30,18 +29,20 @@ def current_health():
 def receive():
     # Process JSON to Pool Model Object
     pool_json = request.get_json()  # Convert string to json object
-    pool = convert_to_pool(pool_json)
-    if pool is None:
-        return {"Format": "Wrong"}
+    for x in pool_json["Pool"]:
+        pool = convert_to_pool(x)
 
-    # TODO Verification Process
-    verified = verify(pool)
-    resp = {"pool_id": pool.id, "response": verified}  # Placeholder
+        if pool is None:
+            return {"Format": "Wrong"}
 
-    # Send Response Back to Server
-    send_block(request.remote_addr, resp)
+        # TODO Verification Process
+        verified = verify(pool)
+        resp = {"pool_id": pool.id, "response": verified}  # Placeholder
 
-    return pool.as_dict(), STATUS_OK
+        # Send Response Back to Server
+        send_block(request.remote_addr, resp)
+
+        return pool.as_dict(), STATUS_OK
 
 
 @app.route('/send_block')
@@ -67,4 +68,3 @@ def index():
     curl http://192.168.75.133:5000/api/test -H "Authorization: Bearer secret-token-1"
     """
     return "Hello, {}!".format(auth.current_user())
-
