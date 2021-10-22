@@ -8,8 +8,6 @@ import requests
 from app import db, app, Session
 from app.models import Block, Peers, Pool, Consensus
 
-from sqlalchemy.orm import scoped_session
-from sqlalchemy.orm import sessionmaker
 
 SYNC_INTERVAL = 60 * 10  # 10 Mins
 TIMEOUT = 30
@@ -101,6 +99,7 @@ def get_live_peers():
 
 
 def send_block(peer, data, url):
+    print("http://{}:{}/{}\n{}".format(peer.ip_address, peer.port, url, data))
     url = "http://{}:{}/{}".format(peer.ip_address, peer.port, url)
     r = requests.post(url, json=data)
     output = {"Peer": url,
@@ -123,7 +122,7 @@ def randomselect():
     numberofpeer = len(peer_list)
     fiftyone = math.ceil(numberofpeer * 0.51)
     delegates = random.sample(peer_list, fiftyone)
-    print(delegates)
+    # print(delegates)
     return delegates  # List of user to give their consensus.
 
 
@@ -165,32 +164,28 @@ def sync_schedule():
 
 # !!! Native SQLAlchemy Syntax !!!
 def send_unverified_block():
-    print("RUN", datetime.now())
+    # TODO Solve sending twice problem
+    print("\nRUN", datetime.now())
     session = Session()
 
     # Every 10 Second
     futures = []
     list_of_unverified = session.query(Pool).order_by(Pool.case_id).all()
     list_of_users = randomselect()
-    print("LEngtr:", len(list_of_users))
+    print("Length:", len(list_of_users))
     pool = ThreadPoolExecutor(5)  # 5 Worker Threads
     for block in list_of_unverified:
-        data = block.case_id, block.meta_data, block.log, block.previous_block_hash, block.block_hash
-        print(block.sendout_time)
+        data = {"case_id": block.case_id, "meta_data": block.meta_data, "log": block.log, "timestamp": block.timestamp, "previous_block_hash": block.previous_block_hash, "block_hash": block.block_hash}
+        print("SENDOUT TIME:", block.sendout_time)
         if block.sendout_time is None:
+            print("IF")
             block.sendout_time = datetime.now()
-            try:
-                db.session.commit()
-                for peer in list_of_users:
-                    futures.append(pool.submit(send_block, peer, data, "receivepool"))  # send block to user
-                # check if user belong to case (dk how to check)
-                block.count += 1  # increment count
-            except:
-                db.session.rollback()
-                raise
-            finally:
-                db.session.close()
+            block.count += 1  # increment count
+            session.commit()
+            for peer in list_of_users:
+                futures.append(pool.submit(send_block, peer, data, "receivepool"))  # send block to user
         else:
+            print("ELSE")
             if block.count < 4:
                 block.count += 1
                 if (block.sendout_time + timedelta(seconds=TIMEOUT)) >= datetime.now():

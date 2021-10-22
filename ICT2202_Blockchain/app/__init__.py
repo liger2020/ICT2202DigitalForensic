@@ -27,9 +27,9 @@ Session = scoped_session(session_factory)
 
 from app.controller import sync_schedule, send_unverified_block
 
-# scheduler = APScheduler()
-# scheduler.init_app(app)
-# scheduler.start()
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
 
 bg_scheduler = BackgroundScheduler()
 # bg_scheduler.add_job(func=sync_schedule, trigger="interval", seconds=30)
