@@ -57,8 +57,8 @@ def receive_block():
 
 
 @app.route('/receive_response', methods=['POST'])
+@auth.login_required
 def receive_response():
-    #@auth.login_required
     # Placeholder Expected Input: {"pool_id": "2", "response": "yes"}
     # Process Json to Consensus Model Object
     resp = request.get_json()
