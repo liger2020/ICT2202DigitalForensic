@@ -36,7 +36,7 @@ def receive():
     return pool.as_dict(), STATUS_OK
 
 
-@app.route('/send_block', methods=['POST'])
+@app.route('/send_block')
 def send():
     test = Pool(1, meta_data="test", log="test")
     db.session.add(test)

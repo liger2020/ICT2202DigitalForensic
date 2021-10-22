@@ -2,7 +2,7 @@ from dateutil import parser
 import math
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 
 from app import db
@@ -167,20 +167,33 @@ def send_unverified_block():
         data = block.case_id, block.meta_data, block.log, block.previous_block_hash, block.block_hash
         print(block.sendout_time)
         if block.sendout_time is None:        
-            block.sendout_time = datetime.now()     
-            # for peer in list_of_users:
-            #      futures.append(pool.submit(send_block, peer, data, "receivepool")) #send block to user
-            #check if user belong to case (dk how to check)
-            block.count += 1 #increment count 
-            db.session.commit()
+            block.sendout_time = datetime.now()      
+            try:
+                db.session.commit()
+                for peer in list_of_users:
+                     futures.append(pool.submit(send_block, peer, data, "receivepool")) #send block to user
+                    #check if user belong to case (dk how to check)
+                block.count += 1 #increment count 
+            except:
+                db.session.rollback()
+                raise
+            finally:
+                db.session.close()
         else:
             if block.count < 4:
                 block.count += 1
-                if (block.sendout_time + datetime.timedelta(seconds=TIMEOUT)) >= datetime.datetime.now():
+                if (block.sendout_time + timedelta(seconds=TIMEOUT)) >= datetime.now():
                     block.sendout_time = datetime.now()         
-                    db.session.commit()
-                # for peer in list_of_users:
-                #     futures.append(pool.submit(send_block, peer, data, "receivepool"))
+                    try:
+                        db.session.commit()
+                        for peer in list_of_users:
+                            futures.append(pool.submit(send_block, peer, data, "receivepool"))
+                    except:
+                        db.session.rollback()
+                        raise
+                    finally:
+                        db.session.close()
+                    
             else:
                 db.session.delete(block)
                 consensus_list = Consensus.query.filter_by(pool_id=block.id).all()

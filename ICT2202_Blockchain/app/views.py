@@ -32,7 +32,7 @@ def current_health():
 # Assuming unverified
 @app.route('/receiveblock', methods=['POST'])
 def receive_block():
-    @auth.login_required
+    # @auth.login_required
     # For Info
     num_of_errors = 0
 
@@ -58,7 +58,7 @@ def receive_block():
 
 @app.route('/receive_response', methods=['POST'])
 def receive_response():
-    @auth.login_required
+    #@auth.login_required
     # Placeholder Expected Input: {"pool_id": "2", "response": "yes"}
     # Process Json to Consensus Model Object
     resp = request.get_json()
@@ -288,3 +288,18 @@ def verify_password(username_or_token, password):
             return False
     g.user = user
     return True
+
+@app.route('/send_block')
+def send():
+    test = Pool(1, meta_data="test", log="test")
+    try:
+        db.session.add(test)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    finally:
+        db.session.close()
+
+
+    return jsonify(output=test), STATUS_OK
