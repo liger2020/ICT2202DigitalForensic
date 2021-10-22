@@ -242,14 +242,13 @@ def new_user():
     """
     username = request.json.get('username')
     password = request.json.get('password')
-    print(username)
-    print(password)
     if username is None or password is None:
         abort(400)  # missing arguments
     if User.query.filter_by(username=username).first() is not None:
         abort(401)  # existing user
     user = User(username=username)
     user.hash_password(password)
+    user.generate_auth_token()
     db.session.add(user)
     db.session.commit()
     return jsonify({'username': user.username}), 201, {'Location': url_for('new_user', id=user.id, _external=True)}
@@ -288,6 +287,7 @@ def verify_password(username_or_token, password):
     g.user = user
     return True
 
+
 @app.route('/send_block')
 def send():
     test = Pool(1, meta_data="test", log="test")
@@ -299,6 +299,5 @@ def send():
         raise
     finally:
         db.session.close()
-
 
     return jsonify(output=test), STATUS_OK
