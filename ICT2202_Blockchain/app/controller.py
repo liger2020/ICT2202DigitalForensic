@@ -118,7 +118,7 @@ def randomselect():
     numberofpeer = len(peer_list)
     fiftyone = math.ceil(numberofpeer * 0.51)
     delegates = random.sample(peer_list, fiftyone)
-    print(delegates)
+    # print(delegates)
     return delegates  # List of user to give their consensus.
 
 
@@ -164,26 +164,24 @@ def send_unverified_block():
     list_of_users = randomselect()
     pool = ThreadPoolExecutor(5)  # 5 Worker Threads
     for block in list_of_unverified:
-        data = block.case_id, block.meta_data, block.log, block.previous_block_hash, block.block_hash
-        print(block.sendout_time)
+        data = block.case_id, block.meta_data, block.log, block.timestamp, block.previous_block_hash, block.block_hash
         if block.sendout_time is None:        
-            block.sendout_time = datetime.now()      
+            block.sendout_time = datetime.now()  
+            print(block.sendout_time) 
             try:
                 db.session.commit()
                 for peer in list_of_users:
-                     futures.append(pool.submit(send_block, peer, data, "receivepool")) #send block to user
-                    #check if user belong to case (dk how to check)
-                block.count += 1 #increment count 
+                        futures.append(pool.submit(send_block, peer, data, "receivepool")) #send block to user
+                block.count += 1 #increment count    
             except:
                 db.session.rollback()
                 raise
-            finally:
-                db.session.close()
         else:
             if block.count < 4:
-                block.count += 1
+                block.count += 1        
                 if (block.sendout_time + timedelta(seconds=TIMEOUT)) >= datetime.now():
-                    block.sendout_time = datetime.now()         
+                    block.sendout_time = datetime.now()  
+                    print(block.sendout_time)        
                     try:
                         db.session.commit()
                         for peer in list_of_users:
@@ -206,6 +204,6 @@ def send_unverified_block():
 
 
     
-send_unverified_block()
+# send_unverified_block()
 #verify()
 # randomselect()

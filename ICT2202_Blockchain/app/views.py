@@ -8,9 +8,9 @@ from flask import request, jsonify, url_for, g
 from flask_restful import abort
 
 from app import app, db
-from app.controller import convert_to_block, get_live_peers, send_block, convert_to_pool, convert_to_consensus
+from app.controller import convert_to_block, get_live_peers, convert_to_pool, convert_to_consensus
 # Import module models
-from app.models import Peers, Block, Pool, Consensus, User
+from app.models import Peers, Block, Pool, User
 
 from flask_httpauth import HTTPBasicAuth
 
@@ -37,12 +37,13 @@ def receive_block():
 
     # Check block need verify
     json_blocks = request.get_json()
+    print(json_blocks)
     for json_block in json_blocks["Pool"]:
         # Convert into class object
         block = convert_to_pool(json_block)
         # print(block)
         if block is None:
-            # print("Error processing: {}".format(json_block))
+            print("Error processing: {}".format(json_block))
             num_of_errors += 1
             continue
 
@@ -289,6 +290,7 @@ def verify_password(username_or_token, password):
     return True
 
 @app.route('/send_block')
+@auth.login_required
 def send():
     test = Pool(1, meta_data="test", log="test")
     try:
@@ -296,9 +298,5 @@ def send():
         db.session.commit()
     except:
         db.session.rollback()
-        raise
-    finally:
-        db.session.close()
 
-
-    return jsonify(output=test), STATUS_OK
+    return jsonify(output=test.as_dict()), STATUS_OK

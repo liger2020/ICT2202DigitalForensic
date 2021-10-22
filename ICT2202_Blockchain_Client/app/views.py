@@ -21,7 +21,8 @@ def current_health():
 @app.route('/receivepool', methods=['POST'])
 def receive():
     # Process JSON to Pool Model Object
-    pool_json = request.get_json()  # Convert string to json object
+    pool_json = request.get_json()
+    # for pool in pool_json["Pool"]:# Convert string to json object
     pool = convert_to_pool(pool_json)
     if pool is None:
         return {"Format": "Wrong"}
