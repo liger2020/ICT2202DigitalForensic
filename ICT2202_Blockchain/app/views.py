@@ -40,12 +40,10 @@ def receive_block():
     for json_block in json_blocks["Pool"]:
         # Convert into class object
         block = convert_to_pool(json_block)
-        # print(block)
         if block is None:
             # print("Error processing: {}".format(json_block))
             num_of_errors += 1
             continue
-
         # Add to Pool
         db.session.add(block)
         db.session.commit()
@@ -61,6 +59,7 @@ def receive_response():
     # Placeholder Expected Input: {"pool_id": "2", "response": "yes"}
     # Process Json to Consensus Model Object
     resp = request.get_json()
+    print(resp)
     consensus = convert_to_consensus(resp, request.remote_addr)
     if consensus is None:
         # TODO return error code
