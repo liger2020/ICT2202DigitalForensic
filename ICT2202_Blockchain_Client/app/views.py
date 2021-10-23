@@ -7,6 +7,7 @@ from app.models import Pool
 from concurrent.futures import ThreadPoolExecutor
 from flask import Flask, g
 from flask_httpauth import HTTPTokenAuth
+import json
 
 STATUS_OK = 200
 STATUS_NOT_FOUND = 404
@@ -25,6 +26,18 @@ def current_health():
             "Health": "Good"}
     return resp, STATUS_OK
 
+@app.route('/data_extraction', methods=['POST'])
+def check_endpoint2():   
+    pool_json= request.get_json()
+    for x in pool_json["Pool"]:
+        pool = json.dumps(x)
+        if pool is None:
+            return {"Format": "Wrong"}
+        else:
+            return pool
+    # result = data['case_id']
+    # out={"result": str(result)}
+    # return json.dumps(out)
 
 @app.route('/receivepool', methods=['POST'])
 def receive():
@@ -32,16 +45,12 @@ def receive():
 
     # Process JSON to Pool Model Object
     pool_json = request.get_json()  # Convert string to json object
-    for x in pool_json["Pool"]:
-        pool = convert_to_pool(x)
+    for pool in pool_json["Pool"]:
         if pool is None:
             return {"Format": "Wrong"}
-
-        # verified = verify(pool)
-        # print("AFTER VERIFY", verified)
+        verified = verify(pool)
         # TODO VERIFY RETURNING NONE
-        verified = 1
-        resp = {"pool_id": pool.id, "response": verified}  # Placeholder
+        resp = {"pool_id": pool.get('id'), "response": verified}  # Placeholder
 
         # Send Response Back to Server
         thread_pool.submit(send_block, request.remote_addr, resp)  # send block to user

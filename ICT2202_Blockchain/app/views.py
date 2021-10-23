@@ -31,7 +31,7 @@ def current_health():
 
 # Assuming unverified
 @app.route('/receiveblock', methods=['POST'])
-@auth.login_required
+#@auth.login_required
 def receive_block():
     num_of_errors = 0
 
@@ -225,9 +225,10 @@ def check_query():
     return str(query), STATUS_OK
 
 
-@app.route('/send_block')
+@app.route('/send_block', methods=['POST'])
+@auth.login_required
 def send():
-    test = Pool(1, meta_data="test", log="test")
+    test = Block(1, meta_data="test", log="test")
     try:
         db.session.add(test)
         db.session.commit()

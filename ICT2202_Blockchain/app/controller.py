@@ -230,6 +230,6 @@ def send_unverified_block():
 # verify()
 # randomselect()
 
-a = peers
-send_block(, "5000","/api/test")
+# a = peers
+#send_block("5000","/api/test")
 
