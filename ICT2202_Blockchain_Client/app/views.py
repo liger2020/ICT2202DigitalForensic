@@ -27,6 +27,7 @@ def current_health():
 
 
 @app.route('/receivepool', methods=['POST'])
+@auth.login_required
 def receive():
     thread_pool = ThreadPoolExecutor(5)  # 5 Worker Threads
 
