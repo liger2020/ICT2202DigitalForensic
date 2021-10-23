@@ -7,13 +7,14 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
+from flask_httpauth import HTTPTokenAuth
 
 app = Flask(__name__)
 
 # Configurations
 app.config.from_object('config')
 
-auth = HTTPBasicAuth()
+auth = HTTPTokenAuth(scheme='Bearer')
 db = SQLAlchemy(app)
 
 # Using SQLAlchemy ORM for Session
