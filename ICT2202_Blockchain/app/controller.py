@@ -101,14 +101,20 @@ def get_live_peers():
 
 def send_block(peer, data, url):
     url = "http://{}:{}/{}".format(peer.ip_address, peer.port, url)
-    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-    r = requests.post(url, json=data, headers=headers, timeout=3)
-    output = {"Peer": url,
-              "Answer": r.json(),
-              "Status_Code": r.status_code
-              }
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain', "Authorization": "Bearer secret-token-1"}
+    print(data)
+    if data == "":
+        r = requests.get(url, headers=headers, timeout=3)
+        return r
+    else:
+        r = requests.post(url, json=data, headers=headers, timeout=3)
+        output = {"Peer": url,
+                  "Answer": r.json(),
+                  "Status_Code": r.status_code
+                  }
 
-    return output
+        return output
+
 
 
 '''
@@ -226,10 +232,12 @@ def send_unverified_block():
 
     Session.remove()
 
+
 # send_unverified_block()
 # verify()
 # randomselect()
 
-# a = peers
-#send_block("5000","/api/test")
 
+# a = Peers("192.168.75.133", 5000)
+# print(a.as_dict())
+# print(send_block(a, "", "/api/test"))
