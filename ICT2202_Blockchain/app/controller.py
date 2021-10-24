@@ -9,7 +9,7 @@ import requests
 from flask import jsonify
 
 from app import db, app, Session
-from app.models import Block, Peers, Pool, Consensus
+from app.models import Block, Peers, Pool, Consensus, UserCase
 
 SYNC_INTERVAL = 60 * 10  # 10 Mins
 TIMEOUT = 30
@@ -85,7 +85,7 @@ def get_live_peers():
     pool = ThreadPoolExecutor(5)  # 5 Worker Threads
 
     # Get all peer's ip address and port from DB
-    peer_list = Peers.query.all()
+    peer_list = Peers.query.filter_by(server_type="server").all()
 
     # Use check_health() to get whether machine online
     for peer in peer_list:
@@ -108,14 +108,19 @@ def send_block(peer, data, url):
         return r
     else:
         r = requests.post(url, json=data, headers=headers, timeout=3)
-        output = {"Peer": url,
-                  "Answer": r.json(),
-                  "Status_Code": r.status_code
-                  }
+        try:
+            answer = r.json()
+
+        except json.decoder.JSONDecodeError:
+            answer = r.text
+
+        output = {
+            "Peer": url,
+            "Answer": answer,
+            "Status_Code": r.status_code
+        }
 
         return output
-
-
 
 '''
 User will store Case id and the last block hash of the respective cases they are in.
@@ -137,7 +142,7 @@ def sync_schedule():
     live_peers = get_live_peers()
     for peer in live_peers:
         # Ask for his length
-        resp = requests.get("http://{}:{}/sync".format(peer.ip_address, peer.port))
+        resp = send_block(peer, "", "sync")
         if resp.status_code != 200:
             continue
 
@@ -149,20 +154,30 @@ def sync_schedule():
         # Check length received
         for length_json in resp_json["Blocks"]:
             # Make sure json is valid
-            if "id" not in length_json or "length" not in length_json:
+            print(length_json)
+            if "id" not in length_json or "length" not in length_json or "last" not in length_json:
+                print("CONTINUED")
                 continue
 
             case_id = length_json["id"]
             block_count = Block.query.filter_by(id=case_id).count()
+            last_hash_block = Block.query.filter_by(id=case_id) \
+                .order_by(Block.block_number.desc()) \
+                .first()
+            if last_hash_block is None:
+                last_hash = ""
+            else:
+                last_hash = last_hash_block.block_hash
+
+            print("LENGTH:", length_json["length"], block_count)
             # Check if longer
             if length_json["length"] <= block_count:
                 continue
 
-            resp = requests.post("http://{}:{}/sync".format(peer.ip_address, peer.port),
-                                 json={"id": case_id, "length": block_count}, timeout=3)
+            resp = send_block(peer, {"id": case_id, "length": block_count, "last": last_hash}, "sync")
 
-            if resp.status_code == 200:
-                resp_json = resp.json()
+            if resp["Status_Code"] == 200:
+                resp_json = resp["Answer"]
                 for block_json in resp_json["Blocks"]:
                     block = convert_to_block(block_json)
                     db.session.add(block)
@@ -187,10 +202,20 @@ def check_twothird():
             consensus_list = Consensus.query.filter_by(pool_id=pool.id).all()
             number_of_agree = [x for x in consensus_list if x.response]
             if len(number_of_agree) >= twothird:
-                # Add to block TODO
+                # TODO Add to block
                 # add_to_block()
                 print("2/3  liao")
                 # TODO check log action add user
+                # if "Add_User" == block.log["Action"]:
+                #     # Add User to case
+                #     usercase = UserCase(block.case_id, block.log["User"])
+                #     session.add(usercase)
+                #     session.commit()
+                # elif "Remove_User" == block.log["Action"]:
+                #     usercase = session.query(UserCase) \
+                #         .filter(UserCase.username == block.log["User"], UserCase.case_id == block.case_id) \
+                #         .first()
+                #     session.delete(usercase)
 
     Session.remove()
 
@@ -231,7 +256,6 @@ def send_unverified_block():
                 session.commit()
 
     Session.remove()
-
 
 # send_unverified_block()
 # verify()

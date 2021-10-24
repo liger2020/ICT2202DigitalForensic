@@ -122,7 +122,10 @@ def sync():
     for case_id in id_list:
         case_id = case_id[0]  # IDK why
         length = Block.query.filter_by(id=case_id).count()  # Get length of ID
-        output.append({"id": case_id, "length": length})
+        last_hash = Block.query.filter_by(id=case_id) \
+            .order_by(Block.block_number.desc()) \
+            .first()
+        output.append({"id": case_id, "length": length, "last": last_hash.block_hash})
     return jsonify(Blocks=output)
 
 

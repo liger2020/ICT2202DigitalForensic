@@ -4,32 +4,25 @@ from datetime import datetime
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 from passlib.apps import custom_app_context as pwd_context
- 
-
-class Base(db.Model):
-    __abstract__ = True
-
-    id = db.Column(db.Integer, primary_key=True)
-    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
-    date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
 
 
-# TODO Placeholder for testing
-class Peers(Base):
-    __tablename__ = "peers"
+class Peers(db.Model):
+    __tablename__ = "Peers"
     # __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ip_address = db.Column(db.String(15), nullable=False, unique=True)
     port = db.Column(db.SmallInteger, nullable=True)
+    server_type = db.Column(db.String(6), nullable=False)
 
-    def __init__(self, ip_address, port):
+    def __init__(self, ip_address, port, server_type):
         self.ip_address = ip_address
         self.port = port
+        self.server_type = server_type
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-# TODO Placeholder (Ray)
 class Block(db.Model):
     __tablename__ = "Block"
     __table_args__ = {'extend_existing': True}
@@ -146,9 +139,8 @@ class Pool(db.Model):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-# Placeholder TODO
 class Consensus(db.Model):
-    __tablename__ = "consensus"
+    __tablename__ = "Consensus"
     __table_args__ = {'extend_existing': True}
 
     consensus_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -168,11 +160,11 @@ class Consensus(db.Model):
 
 
 class User(db.Model):
-    __tablename__ = 'users'
+    __tablename__ = 'Users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(32), index=True)
     password_hash = db.Column(db.String(128))
-    ip_address = db.Column(db.String(128),nullable=True)
+    ip_address = db.Column(db.String(128), nullable=True)
     token = db.Column(db.String(128), nullable=True)
 
     def hash_password(self, password):
@@ -183,7 +175,7 @@ class User(db.Model):
 
     def generate_auth_token(self):
         s = Serializer(app.config['SECRET_KEY'])
-        token= s.dumps({'id': self.id})
+        token = s.dumps({'id': self.id})
         self.token = token.decode('ascii')
         return s.dumps({'id': self.id})
 
@@ -199,6 +191,22 @@ class User(db.Model):
         user = User.query.get(data['id'])
         return user
 
+
+class UserCase(db.Model):
+    __tablename__ = "UserCase"
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(255), nullable=False)
+    case_id = db.Column(db.Integer, nullable=False)
+
+    def __init__(self, username, case_id):
+        self.username = username
+        self.case_id = case_id
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 # class User_stored_info(db.Model):
 #     __tablename__ = "user_stored_info"
 #     __table_args__ = {'extend_existing': True}
@@ -213,6 +221,3 @@ class User(db.Model):
 
 #     def as_dict(self):
 #         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-
-db.create_all()
