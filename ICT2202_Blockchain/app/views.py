@@ -31,7 +31,7 @@ def current_health():
 
 # Assuming unverified
 @app.route('/receiveblock', methods=['POST'])
-#@auth.login_required
+@auth.login_required
 def receive_block():
     num_of_errors = 0
 
