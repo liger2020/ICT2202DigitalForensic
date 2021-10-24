@@ -29,4 +29,4 @@ bg_scheduler.start()
 db.create_all()
 
 # Shut down the scheduler when exiting the app
-atexit.register(lambda: scheduler.shutdown())
+atexit.register(lambda: bg_scheduler.shutdown())
