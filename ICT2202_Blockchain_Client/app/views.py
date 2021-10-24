@@ -40,7 +40,7 @@ def check_endpoint2():
     # return json.dumps(out)
 
 @app.route('/receivepool', methods=['POST'])
-#@auth.login_required
+@auth.login_required
 def receive():
     thread_pool = ThreadPoolExecutor(5)  # 5 Worker Threads
 
@@ -51,12 +51,12 @@ def receive():
             return {"Format": "Wrong"}
         verified = verify(pool)
         # TODO VERIFY RETURNING NONE
-        resp = {"pool_id": pool.get('id'), "response": verified}  # Placeholder
+        resp = {"pool_id": pool.get('case_id'), "response": verified}  # Placeholder
         
         # Send Response Back to Server
         thread_pool.submit(send_block, request.remote_addr, resp)  # send block to user
 
-        return "Lol", STATUS_OK
+        return resp, STATUS_OK
 
 
 @app.route('/send_block')
