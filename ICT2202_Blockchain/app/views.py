@@ -57,9 +57,8 @@ def receive_block():
 @auth.login_required
 def receive_response():
     # Placeholder Expected Input: {"pool_id": "2", "response": "yes"}
-    # Process Json to Consensus Model Object
+    # Process Json to Consensus Model Object\
     resp = request.get_json()
-    print(resp)
     consensus = convert_to_consensus(resp, request.remote_addr)
     if consensus is None:
         # TODO return error code

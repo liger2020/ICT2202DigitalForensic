@@ -52,11 +52,12 @@ def receive():
         verified = verify(pool)
         # TODO VERIFY RETURNING NONE
         resp = {"pool_id": pool.get('case_id'), "response": verified}  # Placeholder
-        
+        print(resp)
         # Send Response Back to Server
         thread_pool.submit(send_block, request.remote_addr, resp)  # send block to user
-
-        return resp, STATUS_OK
+        print("after submit")
+        
+        return request.remote_addr, STATUS_OK
 
 
 @app.route('/send_block')

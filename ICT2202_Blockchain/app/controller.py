@@ -197,14 +197,36 @@ def check_twothird():
         # If Unverified block Timed Out, Check all response to check if 2/3
         if pool.sendout_time + timedelta(seconds=TIMEOUT) >= datetime.now():
             # Check if id has 2/3 >, add to block
-            numberofpeer = len(Peers.query.all())
-            twothird = math.ceil(numberofpeer * 0.66)
+            numberofpeer = len(Peers.query.filter(Peers.server_type=="client").all()) 
+            print("This is the number of peer:" , str(numberofpeer))
+            selectnumber = math.ceil(numberofpeer * 0.51)
+            print("This is the select number:", str(selectnumber))
+            twothird = math.ceil(selectnumber * 0.66)
+            print("This is the deciding factor number:", twothird)
             consensus_list = Consensus.query.filter_by(pool_id=pool.id).all()
             number_of_agree = [x for x in consensus_list if x.response]
             if len(number_of_agree) >= twothird:
-                # TODO Add to block
-                # add_to_block()
-                print("2/3  liao")
+                verified_block = Pool.query.filter_by(id=pool.id).first()
+                print("Case ID:",str(verified_block.case_id))
+                print("Block number:", str(verified_block.block_number))
+                print("meta data:", verified_block.meta_data)
+                print("log:", verified_block.log)
+                print("last verified hash: ", str(verified_block.previous_block_hash))
+                print("timestamp:", str(verified_block.timestamp))
+                print("Just verified block:", str(verified_block.block_hash))
+                verified_block.status = 1
+                session.commit()
+                # add_the_block = Block(
+                #     id=verified_block.case_id, 
+                #     block_number=verified_block.block_number, 
+                #     previous_block_hash=send_unverified_block.previous_block_hash,
+                #     meta_data=send_unverified_block.meta_data,
+                #     log=send_unverified_block.log,
+                #     timestamp=send_unverified_block.timestamp,
+                #     block_hash=send_unverified_block.block_hash,
+                #     status=1,
+                #     ) 
+                print("2/3  liao") 
                 # TODO check log action add user
                 # if "Add_User" == block.log["Action"]:
                 #     # Add User to case
@@ -216,6 +238,8 @@ def check_twothird():
                 #         .filter(UserCase.username == block.log["User"], UserCase.case_id == block.case_id) \
                 #         .first()
                 #     session.delete(usercase)
+            else:
+                print("Fail")
 
     Session.remove()
 
@@ -240,20 +264,24 @@ def send_unverified_block():
             for peer in list_of_users:
                 thread_pool.submit(send_block, peer, data, "receivepool")  # send block to user
         else:
-            if block.count < 3:
-                block.count += 1  # increment count
-                if (block.sendout_time + timedelta(seconds=TIMEOUT)) <= datetime.now():
-                    block.sendout_time = datetime.now()
-                    session.commit()
-
-                    for peer in list_of_users:
-                        thread_pool.submit(send_block, peer, data, "receivepool")  # send block to user
+            if block.status:
+                pass 
+                #interrupt schedule and move on
             else:
-                session.delete(block)
-                consensus_list = session.query(Consensus).filter(Consensus.pool_id == block.id).all()
-                for remove_consensus in consensus_list:
-                    session.delete(remove_consensus)
-                session.commit()
+                if block.count < 3:
+                    block.count += 1  # increment count
+                    if (block.sendout_time + timedelta(seconds=TIMEOUT)) <= datetime.now():
+                        block.sendout_time = datetime.now()
+                        session.commit()
+
+                        for peer in list_of_users:
+                            thread_pool.submit(send_block, peer, data, "receivepool")  # send block to user
+                else:
+                    session.delete(block)
+                    consensus_list = session.query(Consensus).filter(Consensus.pool_id == block.id).all()
+                    for remove_consensus in consensus_list:
+                        session.delete(remove_consensus)
+                    session.commit()
 
     Session.remove()
 

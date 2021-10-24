@@ -128,15 +128,19 @@ def verify(unverified_block):
     log = unverified_block.get('log')
     timestamp = unverified_block.get('timestamp')
     block_hash = unverified_block.get('block_hash')
-    print(timestamp)
-    print(type(timestamp))
     user_block_info = User_stored_info.query.filter_by(case_id=caseid).first()
     if user_block_info.last_verified_hash == prev_hash:
+        print("HIT 1")
         verifying = "-".join(metadata) + "-".join(log) + "-" + str(
             timestamp) \
                     + "-" + user_block_info.last_verified_hash
         verify_block_hash = hashlib.sha256(verifying.encode()).hexdigest()
         if verify_block_hash == block_hash:
+            print("HIT 2")
             return True
         else:
+            print("HIT 3")
             return False
+    else:
+        print("HIT 4")
+        return False
