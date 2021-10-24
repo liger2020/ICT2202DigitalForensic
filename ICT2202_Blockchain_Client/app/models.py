@@ -14,7 +14,7 @@ class Base(db.Model):
 
 
 class Peers(Base):
-    __tablename__ = "peers"
+    __tablename__ = "Peers"
     # __table_args__ = {'extend_existing': True}
     ip_address = db.Column(db.String(15), nullable=False, unique=True)
     port = db.Column(db.SmallInteger, nullable=True)
@@ -28,7 +28,7 @@ class Peers(Base):
 
 
 class Pool(db.Model):
-    __tablename__ = "pool"
+    __tablename__ = "Pool"
     __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
@@ -53,7 +53,7 @@ class Pool(db.Model):
 
 
 class User_stored_info(db.Model):
-    __tablename__ = "user_stored_info"
+    __tablename__ = "User_stored_info"
     __table_args__ = {'extend_existing': True}
 
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)

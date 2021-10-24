@@ -42,7 +42,7 @@ def get_live_peers():
 
 
 def send_block(ip_address, data):
-    url = "http://{}:5000/receive_response ".format(ip_address)
+    url = "http://{}:5000/receive_response".format(ip_address)
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain', "Authorization": "Bearer secret-token-1"}
     r = requests.post(url, json=data, headers=headers, timeout=1)
     try:
