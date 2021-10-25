@@ -8,12 +8,11 @@ from flask_httpauth import HTTPTokenAuth
 from app import app, db, auth
 from app.controller import convert_to_pool, convert_to_consensus
 # Import module models
-from app.models import Peers, Block, Pool, Consensus, User
+from app.models import Peers, Block, Pool, Consensus, User, UserCase
 
 STATUS_OK = 200
 STATUS_NOT_FOUND = 404
 TIMEOUT = 60 * 15
-
 
 tokens = {
     "secret-token-1": "john",
@@ -251,6 +250,37 @@ def verify_token(token):
 @app.route('/api/test')
 @auth.login_required
 def index():
+    """
+    testing remove before final product
+    curl http://192.168.75.133:5000/api/test -H "Authorization: Bearer secret-token-1"
+    """
+    return "Hello, {}!".format(auth.current_user())
+
+
+@app.route('/assignedCase', methods=['POST'])
+@auth.login_required
+def assignedCase():
+    """
+    testing remove before final product
+    curl http://192.168.75.133:5000/api/test -H "Authorization: Bearer secret-token-1"
+    """
+    username = request.json.get('username')
+    caseid = request.json.get('case_id')
+    if username is None:
+        abort(400)
+        return "failed, username is None"
+    query = UserCase.query.filter_by(username=username).first()
+    if query is not None:
+        caseid = query.case_id + "-" + caseid
+    sql = UserCase(username=username, case_id=caseid)
+    db.session.add(sql)
+    db.session.commit()
+    return "Success"
+
+
+@app.route('/caseinfo')
+@auth.login_required
+def caseinfo():
     """
     testing remove before final product
     curl http://192.168.75.133:5000/api/test -H "Authorization: Bearer secret-token-1"
