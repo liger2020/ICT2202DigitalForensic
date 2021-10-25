@@ -1,5 +1,6 @@
 import json
 
+import hashlib
 from dateutil import parser
 import math
 import random
@@ -271,6 +272,22 @@ def check_twothird():
 
     Session.remove()
 
+def verify(case_id):
+    blocks = Block.query.filter_by(id=case_id).order_by(Block.block_number.asc()).all()
+    previous_block_hash = ""
+    for block in blocks:
+        if previous_block_hash != block.previous_block_hash:
+            return False
+
+        data = "-".join(block.meta_data) + "-".join(block.log) + "-" + str(block.timestamp) \
+                          + "-" + block.previous_block_hash
+        block_hash = hashlib.sha256(data.encode()).hexdigest()
+        if block_hash != block.block_hash:
+            return False
+        previous_block_hash = block_hash
+    return True  
+
+
 
 # !!! Native SQLAlchemy Syntax !!!
 def send_unverified_block():
@@ -314,7 +331,7 @@ def send_unverified_block():
     Session.remove()
 
 # send_unverified_block()
-# verify()
+print(verify("1"))
 # randomselect()
 
 
