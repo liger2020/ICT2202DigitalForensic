@@ -67,23 +67,34 @@ def receive_response():
     # Placeholder Expected Input: {"pool_id": "2", "response": "yes"}
     # Process Json to Consensus Model Object\
     resp = request.get_json()
+    print(resp)
     consensus = convert_to_consensus(resp, request.remote_addr)
+    print(consensus)
+    print("This is consensus pool id::" + str(consensus.pool_id))
     if consensus is None:
         # TODO return error code
         return {"error": "very true"}
 
     # Check Timeout
     pool = Pool.query.filter_by(id=consensus.pool_id).first()
+    print(pool)
     if pool is not None:
+        print("HIT 1")
         response_timestamp = pool.sendout_time
         if (response_timestamp + datetime.timedelta(seconds=TIMEOUT)) >= datetime.datetime.now():
             # Add to consensus Table TODO Add checks
-            db.session.add(consensus)
-            db.session.commit()
+            consent = Consensus.query.filter_by(ip_address=consensus.ip_address,pool_id=consensus.pool_id).first()
+            if consent is None:
+                db.session.add(consensus)
+                db.session.commit()
+            else:
+                consent.receive_timestamp = consensus.receive_timestamp
+                db.session.commit()
         else:
             # Discard (TIMED OUT)
             pass
-
+    else:
+        print("HIt 2")
     return {"Responding From": "/receive_response"}, STATUS_OK
 
 

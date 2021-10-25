@@ -221,18 +221,30 @@ def check_twothird():
                 # session.commit()
                 
                 #DO NOT DELETE
-                # add_the_block = Block(
-                #     id=verified_block.case_id,
-                #     block_number=verified_block.block_number,
-                #     previous_block_hash=send_unverified_block.previous_block_hash,
-                #     meta_data=send_unverified_block.meta_data,
-                #     log=send_unverified_block.log,
-                #     timestamp=send_unverified_block.timestamp,
-                #     block_hash=send_unverified_block.block_hash,
-                #     status=1,
-                #     )
-                # session.add(verified_block)
-                # session.commit()
+                add_the_block = Block(
+                    id=verified_block.case_id,
+                    # block_number=verified_block.block_number,
+                    # previous_block_hash=send_unverified_block.previous_block_hash,
+                    meta_data=verified_block.meta_data,
+                    log=verified_block.log
+                    # timestamp=send_unverified_block.timestamp,
+                    # block_hash=send_unverified_block.block_hash,
+                    # status=1,
+                    )
+
+                add_the_block.block_hash = verified_block.block_hash
+                add_the_block.timestamp=verified_block.timestamp
+                add_the_block.status=1
+
+                session.add(add_the_block)
+                remove_old_pool = session.query(Pool).filter(Pool.id == verified_block.id).first() 
+                session.delete(remove_old_pool)
+                consensus_list = session.query(Consensus).filter(Consensus.pool_id == verified_block.id).all()
+                for remove_consensus in consensus_list:
+                    session.delete(remove_consensus)
+                session.commit()
+                #TODO Delete consensus and pool of verified block, 
+                # update all pool with same case id using block count and reset the count
 
                 #commiting to meta_data_file table
                 # sql = meta_data_file(case_id=verified_block.case_id, meta_data=verified_block.meta_data.File_Name)
