@@ -78,7 +78,7 @@ def check_health(peer):
         return None
 
 
-def get_live_peers():
+def get_live_peers(servertype):
     # Check peers alive
     live_peers = []
     futures = []
@@ -86,7 +86,7 @@ def get_live_peers():
     pool = ThreadPoolExecutor(5)  # 5 Worker Threads
 
     # Get all peer's ip address and port from DB
-    peer_list = Peers.query.filter_by(server_type="server").all()
+    peer_list = Peers.query.filter_by(server_type=servertype).all()
 
     # Use check_health() to get whether machine online
     for peer in peer_list:
@@ -140,7 +140,7 @@ def randomselect():
 
 
 def sync_schedule():
-    live_peers = get_live_peers()
+    live_peers = get_live_peers("server")
     for peer in live_peers:
         # Ask for his length
         resp = send_block(peer, "", "sync")
@@ -183,6 +183,20 @@ def sync_schedule():
                     block = convert_to_block(block_json)
                     db.session.add(block)
                 db.session.commit()
+
+
+def send_new_verified_to_clients(add_the_block):
+    pool = ThreadPoolExecutor(5)  # 5 Worker Threads
+
+    data = {
+        "case_id": add_the_block.id,
+        "previous_hash": add_the_block.previous_block_hash,
+        "last_verified_hash": add_the_block.block_hash,
+        "length": add_the_block.block_number + 1
+    }
+    client_list = Peers.query.filter_by(server_type="client").all()
+    for client in client_list:
+        pool.submit(send_block, client, data, "sync")
 
 
 # !!! Native SQLAlchemy Syntax !!!
@@ -244,8 +258,12 @@ def check_twothird():
                 for remove_consensus in consensus_list:
                     session.delete(remove_consensus)
                 session.commit()
-                #TODO Delete consensus and pool of verified block, 
+
+                #TODO Delete consensus and pool of verified block,
                 # update all pool with same case id using block count and reset the count
+
+                # Sending new verified blocks to clients
+                send_new_verified_to_clients(add_the_block)
 
                 #commiting to meta_data_file table
                 # sql = meta_data_file(case_id=verified_block.case_id, meta_data=verified_block.meta_data.File_Name)
@@ -331,7 +349,7 @@ def send_unverified_block():
     Session.remove()
 
 # send_unverified_block()
-print(verify("1"))
+# print(verify("1"))
 # randomselect()
 
 

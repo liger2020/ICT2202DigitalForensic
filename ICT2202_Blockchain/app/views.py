@@ -105,33 +105,6 @@ def receive_response():
 #     return jsonify(output=blocks), STATUS_OK
 
 
-# Testing sending block
-# @app.route("/test")
-# def test():
-#     start = time.time()
-#
-#     # Get peers alive
-#     live_peers = get_live_peers()
-#
-#     # Send blocks to peer
-#     output_list = []
-#     for peer in live_peers:
-#         data = {"Blocks": [
-#             {
-#                 "index": "1",
-#                 "proof_number": "1",
-#                 "previous_block_hash": "",
-#                 "meta_data": ["1", "2", "3"]
-#             }]
-#         }
-#
-#         output_list.append(send_block(peer, data))
-#
-#     end = time.time()
-#
-#     return jsonify({"Output": output_list, "Time": end - start})
-
-
 @app.route('/sync')
 @auth.login_required
 def sync():
