@@ -217,8 +217,8 @@ def check_twothird():
                 print("last verified hash: ", str(verified_block.previous_block_hash))
                 print("timestamp:", str(verified_block.timestamp))
                 print("Just verified block:", str(verified_block.block_hash))
-                verified_block.status = 1
-                session.commit()
+                # verified_block.status = 1
+                # session.commit()
                 
                 #DO NOT DELETE
                 # add_the_block = Block(
@@ -235,9 +235,9 @@ def check_twothird():
                 # session.commit()
 
                 #commiting to meta_data_file table
-                sql = meta_data_file(case_id=verified_block.case_id, meta_data=verified_block.meta_data.File_Name)
-                session.add(sql)
-                session.commit()
+                # sql = meta_data_file(case_id=verified_block.case_id, meta_data=verified_block.meta_data.File_Name)
+                # session.add(sql)
+                # session.commit()
 
 
                 # print("2/3  liao") 

@@ -37,15 +37,24 @@ def receive_block():
     # Check block need verify
     json_blocks = request.get_json()
     for json_block in json_blocks["Pool"]:
+
         # Convert into class object
         block = convert_to_pool(json_block)
         if block is None:
-            # print("Error processing: {}".format(json_block))
+            print("Error processing: {}".format(json_block))
             num_of_errors += 1
             continue
-        # Add to Pool
-        db.session.add(block)
-        db.session.commit()
+
+        # If case doesnt exist (Block 0) add to block directly
+        exist = Block.query.filter_by(id=block.id).first()
+        if exist:
+            # Add to block
+            # TODO
+            pass
+        else:
+            # Add to Pool
+            db.session.add(block)
+            db.session.commit()
 
     # Print extra info
     json_blocks.update({"Errors": num_of_errors})

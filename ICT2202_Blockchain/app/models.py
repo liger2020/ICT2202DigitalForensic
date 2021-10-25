@@ -26,7 +26,7 @@ class Peers(db.Model):
 class Block(db.Model):
     __tablename__ = "Block"
     __table_args__ = {'extend_existing': True}
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(255), primary_key=True)
     block_number = db.Column(db.Integer, primary_key=True)
     previous_block_hash = db.Column(db.String(255))
     meta_data = db.Column(db.String(255), nullable=True)
