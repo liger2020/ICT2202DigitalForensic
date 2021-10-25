@@ -123,6 +123,7 @@ def send_block(peer, data, url):
 
         return output
 
+
 '''
 User will store Case id and the last block hash of the respective cases they are in.
 When verification is needed, the server will select 51 percent of the people in the case. 
@@ -155,9 +156,7 @@ def sync_schedule():
         # Check length received
         for length_json in resp_json["Blocks"]:
             # Make sure json is valid
-            print(length_json)
             if "id" not in length_json or "length" not in length_json or "last" not in length_json:
-                print("CONTINUED")
                 continue
 
             case_id = length_json["id"]
@@ -170,7 +169,6 @@ def sync_schedule():
             else:
                 last_hash = last_hash_block.block_hash
 
-            print("LENGTH:", length_json["length"], block_count)
             # Check if longer
             if length_json["length"] <= block_count:
                 continue
@@ -182,7 +180,12 @@ def sync_schedule():
                 for block_json in resp_json["Blocks"]:
                     block = convert_to_block(block_json)
                     db.session.add(block)
-                db.session.commit()
+
+                # If verified add to block, else discard
+                if verify(case_id):
+                    db.session.commit()
+                else:
+                    db.session.rollback()
 
 
 def send_new_verified_to_clients(add_the_block):
@@ -212,8 +215,8 @@ def check_twothird():
         # If Unverified block Timed Out, Check all response to check if 2/3
         if pool.sendout_time + timedelta(seconds=TIMEOUT) >= datetime.now():
             # Check if id has 2/3 >, add to block
-            numberofpeer = len(Peers.query.filter(Peers.server_type=="client").all()) 
-            print("This is the number of peer:" , str(numberofpeer))
+            numberofpeer = len(Peers.query.filter(Peers.server_type == "client").all())
+            print("This is the number of peer:", str(numberofpeer))
             selectnumber = math.ceil(numberofpeer * 0.51)
             print("This is the select number:", str(selectnumber))
             twothird = math.ceil(selectnumber * 0.66)
@@ -225,7 +228,7 @@ def check_twothird():
             number_of_consensuses = [x for x in consensus_list if x.response]
             if len(number_of_consensuses) >= twothird:
                 verified_block = Pool.query.filter_by(id=pool.id).first()
-                print("Case ID:",str(verified_block.case_id))
+                print("Case ID:", str(verified_block.case_id))
                 print("Block number:", str(verified_block.block_number))
                 print("meta data:", verified_block.meta_data)
                 print("log:", verified_block.log)
@@ -234,8 +237,8 @@ def check_twothird():
                 print("Just verified block:", str(verified_block.block_hash))
                 # verified_block.status = 1
                 # session.commit()
-                
-                #DO NOT DELETE
+
+                # DO NOT DELETE
                 add_the_block = Block(
                     id=verified_block.case_id,
                     # block_number=verified_block.block_number,
@@ -245,33 +248,32 @@ def check_twothird():
                     # timestamp=send_unverified_block.timestamp,
                     # block_hash=send_unverified_block.block_hash,
                     # status=1,
-                    )
+                )
 
                 add_the_block.block_hash = verified_block.block_hash
-                add_the_block.timestamp=verified_block.timestamp
-                add_the_block.status=1
+                add_the_block.timestamp = verified_block.timestamp
+                add_the_block.status = 1
 
                 session.add(add_the_block)
-                remove_old_pool = session.query(Pool).filter(Pool.id == verified_block.id).first() 
+                remove_old_pool = session.query(Pool).filter(Pool.id == verified_block.id).first()
                 session.delete(remove_old_pool)
                 consensus_list = session.query(Consensus).filter(Consensus.pool_id == verified_block.id).all()
                 for remove_consensus in consensus_list:
                     session.delete(remove_consensus)
                 session.commit()
 
-                #TODO Delete consensus and pool of verified block,
+                # TODO Delete consensus and pool of verified block,
                 # update all pool with same case id using block count and reset the count
 
                 # Sending new verified blocks to clients
                 send_new_verified_to_clients(add_the_block)
 
-                #commiting to meta_data_file table
+                # commiting to meta_data_file table
                 # sql = meta_data_file(case_id=verified_block.case_id, meta_data=verified_block.meta_data.File_Name)
                 # session.add(sql)
                 # session.commit()
 
-
-                # print("2/3  liao") 
+                # print("2/3  liao")
                 # TODO check log action add user
                 # if "Add_User" == block.log["Action"]:
                 #     # Add User to case
@@ -284,11 +286,11 @@ def check_twothird():
                 #         .first()
                 #     session.delete(usercase)
 
-
             # else:
             #     print("Fail")
 
     Session.remove()
+
 
 def verify(case_id):
     blocks = Block.query.filter_by(id=case_id).order_by(Block.block_number.asc()).all()
@@ -298,13 +300,13 @@ def verify(case_id):
             return False
 
         data = "-".join(block.meta_data) + "-".join(block.log) + "-" + str(block.timestamp) \
-                          + "-" + block.previous_block_hash
+               + "-" + block.previous_block_hash
         block_hash = hashlib.sha256(data.encode()).hexdigest()
+        print(block_hash)
         if block_hash != block.block_hash:
             return False
         previous_block_hash = block_hash
-    return True  
-
+    return True
 
 
 # !!! Native SQLAlchemy Syntax !!!
@@ -328,8 +330,8 @@ def send_unverified_block():
                 thread_pool.submit(send_block, peer, data, "receivepool")  # send block to user
         else:
             if block.status:
-                pass 
-                #interrupt schedule and move on
+                pass
+                # interrupt schedule and move on
             else:
                 if block.count < 3:
                     block.count += 1  # increment count
