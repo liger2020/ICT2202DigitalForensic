@@ -198,7 +198,7 @@ class UserCase(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(255), nullable=False)
-    case_id = db.Column(db.Integer, nullable=False)
+    case_id = db.Column(db.String(255), nullable=False)
 
     def __init__(self, username, case_id):
         self.username = username
@@ -206,6 +206,17 @@ class UserCase(db.Model):
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
+class meta_data_file(db.Model):
+    __tablename__ = "meta_data_file"
+    __table_args__ = {'extend_existing': True}
+    case_id = db.Column(db.String(15), nullable=False, primary_key=True)
+    meta_data = db.Column(db.String(15), nullable=False)
+
+    def __init__(self, case_id, meta_data):
+        self.case_id = case_id
+        self.meta_data = meta_data
 
 # class User_stored_info(db.Model):
 #     __tablename__ = "user_stored_info"
