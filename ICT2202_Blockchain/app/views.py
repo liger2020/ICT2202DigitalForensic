@@ -8,7 +8,7 @@ from flask_httpauth import HTTPTokenAuth
 from app import app, db, auth
 from app.controller import convert_to_pool, convert_to_consensus
 # Import module models
-from app.models import Peers, Block, Pool, Consensus, User, UserCase
+from app.models import Peers, Block, Pool, Consensus, User, UserCase, meta_data_file
 
 STATUS_OK = 200
 STATUS_NOT_FOUND = 404
@@ -266,35 +266,34 @@ def index():
     return "Hello, {}!".format(auth.current_user())
 
 
-@app.route('/assignedCase', methods=['POST'])
+@app.route('/userAssignedCase', methods=['POST'])
 @auth.login_required
 def assignedCase():
     """
-    testing remove before final product
-    curl http://192.168.75.133:5000/api/test -H "Authorization: Bearer secret-token-1"
+curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://192.168.75.133:5000/userAssignedCase -d {\"username\":\"test2\"}
     """
     username = request.json.get('username')
-    caseid = request.json.get('case_id')
     if username is None:
         abort(400)
         return "failed, username is None"
     query = UserCase.query.filter_by(username=username).first()
-    if query is not None:
-        caseid = query.case_id + "-" + caseid
-    sql = UserCase(username=username, case_id=caseid)
-    db.session.add(sql)
-    db.session.commit()
-    return "Success"
+    if query:
+        return query.case_id
+    return "fail"
 
 
-@app.route('/caseinfo')
+@app.route('/caseinfo', methods=['POST'])
 @auth.login_required
 def caseinfo():
+    """
+    curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://192.168.75.133:5000/caseinfo -d {\"case_id\":\"1\"}
+    """
     case_id = request.json.get('case_id')
-    if Block.query.filter_by(id=case_id).last():
-        return Block.meta_data
-
-    return "Hello, {}!".format(auth.current_user())
+    sql = meta_data_file.query.filter_by(case_id=case_id).first()
+    if sql:
+        return sql.meta_data
+    else:
+        return "fail, cannot find case_id"
 
 # @app.route('/api/users', methods=['POST'])
 # def new_user():
