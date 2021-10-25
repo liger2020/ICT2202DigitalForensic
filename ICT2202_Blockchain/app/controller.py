@@ -9,7 +9,7 @@ import requests
 from flask import jsonify
 
 from app import db, app, Session
-from app.models import Block, Peers, Pool, Consensus, UserCase
+from app.models import Block, Peers, Pool, Consensus, UserCase, meta_data_file
 
 SYNC_INTERVAL = 60 * 10  # 10 Mins
 TIMEOUT = 30
@@ -207,32 +207,39 @@ def check_twothird():
             consensus_list = Consensus.query.filter_by(pool_id=pool.id).all()
             print(consensus_list)
             print(type(consensus_list))
-            # number_of_consensuses = [x for x in consensus_list if x.response]
-            # if len(number_of_consensuses) >= twothird:
-            #     verified_block = Pool.query.filter_by(id=pool.id).first()
-            #     print("Case ID:",str(verified_block.case_id))
-            #     print("Block number:", str(verified_block.block_number))
-            #     print("meta data:", verified_block.meta_data)
-            #     print("log:", verified_block.log)
-            #     print("last verified hash: ", str(verified_block.previous_block_hash))
-            #     print("timestamp:", str(verified_block.timestamp))
-            #     print("Just verified block:", str(verified_block.block_hash))
-                # verified_block.status = 1
-                # session.commit()
+            number_of_consensuses = [x for x in consensus_list if x.response]
+            if len(number_of_consensuses) >= twothird:
+                verified_block = Pool.query.filter_by(id=pool.id).first()
+                print("Case ID:",str(verified_block.case_id))
+                print("Block number:", str(verified_block.block_number))
+                print("meta data:", verified_block.meta_data)
+                print("log:", verified_block.log)
+                print("last verified hash: ", str(verified_block.previous_block_hash))
+                print("timestamp:", str(verified_block.timestamp))
+                print("Just verified block:", str(verified_block.block_hash))
+                verified_block.status = 1
+                session.commit()
                 
                 #DO NOT DELETE
                 # add_the_block = Block(
-                #     id=verified_block.case_id, 
-                #     block_number=verified_block.block_number, 
+                #     id=verified_block.case_id,
+                #     block_number=verified_block.block_number,
                 #     previous_block_hash=send_unverified_block.previous_block_hash,
                 #     meta_data=send_unverified_block.meta_data,
                 #     log=send_unverified_block.log,
                 #     timestamp=send_unverified_block.timestamp,
                 #     block_hash=send_unverified_block.block_hash,
                 #     status=1,
-                #     ) 
-                #session.add(verified_block)
-                #session.commit()
+                #     )
+                # session.add(verified_block)
+                # session.commit()
+
+                #commiting to meta_data_file table
+                sql = meta_data_file(case_id=verified_block.case_id, meta_data=verified_block.meta_data.File_Name)
+                session.add(sql)
+                session.commit()
+
+
                 # print("2/3  liao") 
                 # TODO check log action add user
                 # if "Add_User" == block.log["Action"]:
@@ -245,6 +252,8 @@ def check_twothird():
                 #         .filter(UserCase.username == block.log["User"], UserCase.case_id == block.case_id) \
                 #         .first()
                 #     session.delete(usercase)
+
+
             # else:
             #     print("Fail")
 

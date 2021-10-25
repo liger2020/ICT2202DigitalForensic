@@ -281,10 +281,10 @@ def assignedCase():
 @app.route('/caseinfo')
 @auth.login_required
 def caseinfo():
-    """
-    testing remove before final product
-    curl http://192.168.75.133:5000/api/test -H "Authorization: Bearer secret-token-1"
-    """
+    case_id = request.json.get('case_id')
+    if Block.query.filter_by(id=case_id).last():
+        return Block.meta_data
+
     return "Hello, {}!".format(auth.current_user())
 
 # @app.route('/api/users', methods=['POST'])
