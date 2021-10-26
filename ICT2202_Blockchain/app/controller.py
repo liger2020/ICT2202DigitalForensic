@@ -272,6 +272,16 @@ def check_twothird():
                 # sql = meta_data_file(case_id=verified_block.case_id, meta_data=verified_block.meta_data.File_Name)
                 # session.add(sql)
                 # session.commit()
+                
+                #commiting to meta_data_file table
+                queryMeta = meta_data_file.query.filter_by(case_id=verified_block.case_id).first()
+                if queryMeta:
+                    sqlmeta = queryMeta.meta + "," + verified_block.meta_data.File_Name
+                else:
+                    sqlmeta = verified_block.meta_data.File_Name
+                sql = meta_data_file(case_id=verified_block.case_id, meta_data=sqlmeta)
+                session.add(sql)
+                session.commit()
 
                 # print("2/3  liao")
                 # TODO check log action add user
