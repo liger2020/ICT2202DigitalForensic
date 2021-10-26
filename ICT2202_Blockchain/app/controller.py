@@ -262,9 +262,22 @@ def check_twothird():
                     session.delete(remove_consensus)
                 session.commit()
 
-                # TODO Delete consensus and pool of verified block,
-                # update all pool with same case id using block count and reset the count
+                #Resetting the count of the pool after the previous pool is verified
+                # update_pool = session.query(Pool).filter(Pool.case_id == verified_block.case_id).all()
+                # if update_pool is None:
+                #     pass
+                # else:
+                #     for all in update_pool:
+                #         all.count = 0
+                #     session.commit()  
 
+                #     #Changing the first block in the pool with same case ID with the latest block's black_hash
+                #     get_new_first_pool = session.query(Pool).filter(Pool.case_id == verified_block.case_id).first()  
+                #     last_hash_block = Block.query.filter_by(id=verified_block.case_id).order_by(Block.block_number.desc()).first()
+                #     get_new_first_pool.previous_block_hash = last_hash_block.block_hash
+                #     session.commit()
+
+                
                 # Sending new verified blocks to clients
                 send_new_verified_to_clients(add_the_block)
 
