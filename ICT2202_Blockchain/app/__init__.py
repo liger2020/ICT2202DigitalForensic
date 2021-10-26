@@ -2,12 +2,11 @@ import atexit
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask
-from flask_httpauth import HTTPBasicAuth
+from flask_httpauth import HTTPTokenAuth
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
-from flask_httpauth import HTTPTokenAuth
 
 app = Flask(__name__)
 
