@@ -222,18 +222,18 @@ def check_twothird():
             twothird = math.ceil(selectnumber * 0.66)
             print("This is the deciding factor number:", twothird)
             print("This is the pool id:", str(pool.id))
-            consensus_list = session.query(Consensus).filter(Consensus.pool_id == pool.id).all()
-            print(consensus_list)
-            print(type(consensus_list))
+            consensus_list = session.query(Consensus).filter(Consensus.pool_id == pool.id, Consensus.response == 1).all()
             number_of_consensuses = [x for x in consensus_list if x.response]
             if len(number_of_consensuses) >= twothird:
                 verified_block = session.query(Pool).filter(Pool.id == pool.id).first()
-                print("Case ID:", str(verified_block.case_id))
-                print("Block number:", str(verified_block.block_number))
-                print("meta data:", verified_block.meta_data)
-                print("log:", verified_block.log)
+                temp = verified_block.case_id
+                print("Stored temp value: ", temp)
+                # print("Case ID:", str(verified_block.case_id))
+                # print("Block number:", str(verified_block.block_number))
+                # print("meta data:", verified_block.meta_data)
+                # print("log:", verified_block.log)
                 print("last verified hash: ", str(verified_block.previous_block_hash))
-                print("timestamp:", str(verified_block.timestamp))
+                # print("timestamp:", str(verified_block.timestamp))
                 print("Just verified block:", str(verified_block.block_hash))
                 # verified_block.status = 1
                 # session.commit()
@@ -253,7 +253,7 @@ def check_twothird():
                 add_the_block.block_hash = verified_block.block_hash
                 add_the_block.timestamp = verified_block.timestamp
                 add_the_block.status = 1
-
+                print("adding block ....")
                 session.add(add_the_block)
                 remove_old_pool = session.query(Pool).filter(Pool.id == verified_block.id).first()
                 session.delete(remove_old_pool)
@@ -262,19 +262,22 @@ def check_twothird():
                     session.delete(remove_consensus)
                 session.commit()
 
-                #Resetting the count of the pool after the previous pool is verified
+                # # Resetting the count of the pool after the previous pool is verified
                 # update_pool = session.query(Pool).filter(Pool.case_id == verified_block.case_id).all()
+                # get_new_first_pool = session.query(Pool).filter(Pool.case_id == temp).first()  
+                # last_hash_block = Block.query.filter_by(id=temp).order_by(Block.block_number.desc()).first()
                 # if update_pool is None:
                 #     pass
                 # else:
                 #     for all in update_pool:
-                #         all.count = 0
-                #     session.commit()  
-
+                #         print("Turning everyone to 0")
+                #         all.count = 0  
                 #     #Changing the first block in the pool with same case ID with the latest block's black_hash
-                #     get_new_first_pool = session.query(Pool).filter(Pool.case_id == verified_block.case_id).first()  
-                #     last_hash_block = Block.query.filter_by(id=verified_block.case_id).order_by(Block.block_number.desc()).first()
+                #     print("This is get new first pool")
+                #     print("Have stuff in get new first pool")
                 #     get_new_first_pool.previous_block_hash = last_hash_block.block_hash
+                #     print("Get new first pool hash:" , get_new_first_pool.previous_block_hash)
+                #     print("This is the verified block hash: " , last_hash_block.block_hash)
                 #     session.commit()
 
                 
@@ -320,9 +323,10 @@ def check_twothird():
                         .filter(UserCase.username == log_json["Username"], UserCase.case_id == verified_block.case_id) \
                         .first()
                     session.delete(usercase)
-
-            # else:
-            #     print("Fail")
+                else:
+                    pass
+            else:
+                print("Fail")
 
     Session.remove()
 

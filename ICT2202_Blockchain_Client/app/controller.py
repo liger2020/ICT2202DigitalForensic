@@ -187,10 +187,10 @@ def verify(unverified_block):
         verify_block_hash = hashlib.sha256(verifying.encode()).hexdigest()
         if verify_block_hash == block_hash:
             print("HIT 2")
-            return True
+            return 1
         else:
             print("HIT 3")
-            return False
+            return 0
     else:
         print("HIT 4")
-        return False
+        return 0
