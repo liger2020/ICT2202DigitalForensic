@@ -208,8 +208,8 @@ class UserCase(db.Model):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-class meta_data_file(db.Model):
-    __tablename__ = "meta_data_file"
+class MetaDataFile(db.Model):
+    __tablename__ = "MetaDataFile"
     __table_args__ = {'extend_existing': True}
     case_id = db.Column(db.String(15), nullable=False, primary_key=True)
     meta_data = db.Column(db.String(15), nullable=False)

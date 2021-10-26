@@ -10,7 +10,7 @@ import requests
 from flask import jsonify
 
 from app import db, app, Session
-from app.models import Block, Peers, Pool, Consensus, UserCase, meta_data_file
+from app.models import Block, Peers, Pool, Consensus, UserCase, MetaDataFile
 
 SYNC_INTERVAL = 60 * 10  # 10 Mins
 TIMEOUT = 30
@@ -215,19 +215,19 @@ def check_twothird():
         # If Unverified block Timed Out, Check all response to check if 2/3
         if pool.sendout_time + timedelta(seconds=TIMEOUT) >= datetime.now():
             # Check if id has 2/3 >, add to block
-            numberofpeer = len(Peers.query.filter(Peers.server_type == "client").all())
+            numberofpeer = len(session.query(Peers).filter(Peers.server_type == "client").all())
             print("This is the number of peer:", str(numberofpeer))
             selectnumber = math.ceil(numberofpeer * 0.51)
             print("This is the select number:", str(selectnumber))
             twothird = math.ceil(selectnumber * 0.66)
             print("This is the deciding factor number:", twothird)
             print("This is the pool id:", str(pool.id))
-            consensus_list = Consensus.query.filter_by(pool_id=pool.id).all()
+            consensus_list = session.query(Consensus).filter(Consensus.pool_id == pool.id).all()
             print(consensus_list)
             print(type(consensus_list))
             number_of_consensuses = [x for x in consensus_list if x.response]
             if len(number_of_consensuses) >= twothird:
-                verified_block = Pool.query.filter_by(id=pool.id).first()
+                verified_block = session.query(Pool).filter(Pool.id == pool.id).first()
                 print("Case ID:", str(verified_block.case_id))
                 print("Block number:", str(verified_block.block_number))
                 print("meta data:", verified_block.meta_data)
@@ -268,33 +268,37 @@ def check_twothird():
                 # Sending new verified blocks to clients
                 send_new_verified_to_clients(add_the_block)
 
-                # commiting to meta_data_file table
-                # sql = meta_data_file(case_id=verified_block.case_id, meta_data=verified_block.meta_data.File_Name)
+                # commiting to Meta_Data_File table
+                # sql = Meta_Data_File(case_id=verified_block.case_id, meta_data=verified_block.meta_data.File_Name)
                 # session.add(sql)
                 # session.commit()
-                
-                #commiting to meta_data_file table
-                queryMeta = meta_data_file.query.filter_by(case_id=verified_block.case_id).first()
-                if queryMeta:
-                    sqlmeta = queryMeta.meta + "," + verified_block.meta_data.File_Name
-                else:
-                    sqlmeta = verified_block.meta_data.File_Name
-                sql = meta_data_file(case_id=verified_block.case_id, meta_data=sqlmeta)
-                session.add(sql)
-                session.commit()
 
-                # print("2/3  liao")
-                # TODO check log action add user
-                # if "Add_User" == block.log["Action"]:
-                #     # Add User to case
-                #     usercase = UserCase(block.case_id, block.log["User"])
-                #     session.add(usercase)
-                #     session.commit()
-                # elif "Remove_User" == block.log["Action"]:
-                #     usercase = session.query(UserCase) \
-                #         .filter(UserCase.username == block.log["User"], UserCase.case_id == block.case_id) \
-                #         .first()
-                #     session.delete(usercase)
+                # TODO I edited here...
+                # Load string as json
+                metadata_json = json.loads(verified_block.meta_data)
+                log_json = json.loads(verified_block.log)
+
+                # commiting to MetaDataFile table
+                # queryMeta = session.query(MetaDataFile).filter(MetaDataFile.case_id == verified_block.case_id).first()
+                # if queryMeta:
+                #     sqlmeta = queryMeta.meta_data + "," + metadata_json["File_Name"]
+                # else:
+                #     sqlmeta = metadata_json["File_Name"]
+                # sql = MetaDataFile(case_id=verified_block.case_id, meta_data=sqlmeta)
+                # session.add(sql)
+                # session.commit()
+
+                # Check log action add user
+                if "AddUser" == log_json["Action"]:
+                    # Add User to case
+                    usercase = UserCase(log_json["Username"], verified_block.case_id)
+                    session.add(usercase)
+                    session.commit()
+                elif "RemoveUser" == log_json["Action"]:
+                    usercase = session.query(UserCase) \
+                        .filter(UserCase.username == log_json["Username"], UserCase.case_id == verified_block.case_id) \
+                        .first()
+                    session.delete(usercase)
 
             # else:
             #     print("Fail")

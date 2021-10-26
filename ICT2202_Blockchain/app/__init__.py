@@ -25,8 +25,8 @@ from app.controller import sync_schedule, send_unverified_block, check_twothird
 
 bg_scheduler = BackgroundScheduler()
 bg_scheduler.add_job(func=sync_schedule, trigger="interval", seconds=10)
-# bg_scheduler.add_job(func=send_unverified_block, trigger="interval", seconds=10)
-# bg_scheduler.add_job(func=check_twothird, trigger="interval", seconds=10)
+bg_scheduler.add_job(func=send_unverified_block, trigger="interval", seconds=10)
+bg_scheduler.add_job(func=check_twothird, trigger="interval", seconds=10)
 bg_scheduler.start()
 
 from app import views

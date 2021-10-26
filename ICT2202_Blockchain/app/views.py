@@ -8,7 +8,7 @@ from flask_httpauth import HTTPTokenAuth
 from app import app, db, auth
 from app.controller import convert_to_pool, convert_to_consensus
 # Import module models
-from app.models import Peers, Block, Pool, Consensus, User, UserCase, meta_data_file
+from app.models import Peers, Block, Pool, Consensus, User, UserCase, MetaDataFile
 
 STATUS_OK = 200
 STATUS_NOT_FOUND = 404
@@ -139,15 +139,21 @@ def sync_receive():
     # If length is longer then sender, send blocks
     if length > resp_length:
         if resp_last:
-            # Get last block only (For Client)
-            last_block = Block.query.filter(Block.id == resp_id, Block.block_number >= resp_length).order_by(
-                Block.block_number.desc()).first()
-            data = last_block.as_dict()
-            output_list.append(data)
+            # Get send previous hash also (For Client)
+            block_list = Block.query.filter(Block.id == resp_id, Block.block_number >= resp_length).order_by(
+                Block.block_number.desc()).all()
+            for block in block_list:
+                data = {
+                    "id": block.id,
+                    "previous_hash": block.previous_block_hash,
+                    "hash": block.block_hash,
+                    "block_number": block.block_number
+                }
+                output_list.append(data)
         else:
             # Get all blocks above length (For Nodes)
-            block_list = Block.query.filter(Block.id == resp_id, Block.block_number >= resp_length).order_by(
-                Block.block_number.desc())
+            block_list = Block.query.filter(Block.id == resp_id, Block.block_number >= resp_length) \
+                .order_by(Block.block_number.desc())
             block_list_count = Block.query.filter(Block.block_number >= resp_length).count()  # For printing only
             for block in block_list:
                 data = block.as_dict()
@@ -273,7 +279,7 @@ def caseinfo():
     curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://192.168.75.133:5000/caseinfo -d {\"case_id\":\"1\"}
     """
     case_id = request.json.get('case_id')
-    sql = meta_data_file.query.filter_by(case_id=case_id).first()
+    sql = MetaDataFile.query.filter_by(case_id=case_id).first()
     if sql:
         return sql.meta_data
     else:
