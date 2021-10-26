@@ -316,7 +316,6 @@ def verify(case_id):
         data = "-".join(block.meta_data) + "-".join(block.log) + "-" + str(block.timestamp) \
                + "-" + block.previous_block_hash
         block_hash = hashlib.sha256(data.encode()).hexdigest()
-        print(block_hash)
         if block_hash != block.block_hash:
             return False
         previous_block_hash = block_hash

@@ -6,7 +6,7 @@ from flask import request, jsonify, url_for, g
 from flask_restful import abort
 from flask_httpauth import HTTPTokenAuth
 from app import app, db, auth
-from app.controller import convert_to_pool, convert_to_consensus
+from app.controller import convert_to_pool, convert_to_consensus, verify
 # Import module models
 from app.models import Peers, Block, Pool, Consensus, User, UserCase, MetaDataFile
 
@@ -161,49 +161,69 @@ def sync_receive():
     return jsonify({"Blocks": output_list, "length": length, "Count": block_list_count})
 
 
-# TODO Auth for sensitive functions (API Keys)
 # Getting Data From Database
-@app.route('/peers/<peer_ip_address>', methods=['GET'])
-def get_peers(peer_ip_address):
-    peer = Peers.query.filter_by(ip_address=str(peer_ip_address)).first_or_404()
-    return peer.as_dict()
+@app.route('/usercase', methods=['POST'])
+@auth.login_required
+def get_peers():
+    case_list = set()
+
+    post_data = request.get_json()
+    if "Username" not in post_data:
+        return "", STATUS_NOT_FOUND
+
+    username = post_data["Username"]
+    # Get all cases with username
+    usercase_list = UserCase.query.filter_by(username=str(username)).all()
+    if len(usercase_list) > 0:
+        for case in usercase_list:
+            case_id = case.case_id
+
+            # Double check case_id blockchain is verified
+            if verify(case_id):
+                case_list.add(case_id)
+            else:
+                return "Blockchain Verification Failed", STATUS_NOT_FOUND
+        return jsonify({"Cases": list(case_list)}), STATUS_OK
+    else:
+        # No Cases Found
+        return "", STATUS_OK
 
 
-@app.route('/peers', methods=['PUT'])
-def create_peers():
-    peer = request.get_json()
-    if "ip_address" not in peer or "port" not in peer:
-        return 404
-
-    peer_obj = Peers(peer["ip_address"], peer["port"])
-    db.session.add(peer_obj)
-    db.session.commit()
-
-    return peer_obj.as_dict(), STATUS_OK
-
-
-@app.route('/peers', methods=['POST'])
-def update_peers():
-    peer = request.get_json()
-    if "id" not in peer or "ip_address" not in peer or "port" not in peer:
-        return 404
-
-    peer_obj = Peers.query.filter_by(id=peer["id"]).first()
-    peer_obj.ip_address = peer["ip_address"]
-    peer_obj.port = peer["port"]
-
-    db.session.commit()
-
-    return peer, STATUS_OK
-
-
-@app.route('/peers/<peer_ip_address>', methods=['DELETE'])
-def delete_peers(peer_ip_address):
-    peer = Peers.query.filter_by(ip_address=str(peer_ip_address)).first_or_404()
-    db.session.delete(peer)
-    db.session.commit()
-
-    return peer.as_dict(), STATUS_OK
+# @app.route('/peers', methods=['PUT'])
+# def create_peers():
+#     peer = request.get_json()
+#     if "ip_address" not in peer or "port" not in peer:
+#         return 404
+#
+#     peer_obj = Peers(peer["ip_address"], peer["port"])
+#     db.session.add(peer_obj)
+#     db.session.commit()
+#
+#     return peer_obj.as_dict(), STATUS_OK
+#
+#
+# @app.route('/peers', methods=['POST'])
+# def update_peers():
+#     peer = request.get_json()
+#     if "id" not in peer or "ip_address" not in peer or "port" not in peer:
+#         return 404
+#
+#     peer_obj = Peers.query.filter_by(id=peer["id"]).first()
+#     peer_obj.ip_address = peer["ip_address"]
+#     peer_obj.port = peer["port"]
+#
+#     db.session.commit()
+#
+#     return peer, STATUS_OK
+#
+#
+# @app.route('/peers/<peer_ip_address>', methods=['DELETE'])
+# def delete_peers(peer_ip_address):
+#     peer = Peers.query.filter_by(ip_address=str(peer_ip_address)).first_or_404()
+#     db.session.delete(peer)
+#     db.session.commit()
+#
+#     return peer.as_dict(), STATUS_OK
 
 
 @app.route("/getlastblocks")
