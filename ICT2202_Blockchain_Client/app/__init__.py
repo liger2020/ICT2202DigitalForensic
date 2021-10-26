@@ -22,7 +22,7 @@ from app import views
 from app.controller import sync_schedule
 
 bg_scheduler = BackgroundScheduler()
-bg_scheduler.add_job(func=sync_schedule, trigger="interval", seconds=60)
+bg_scheduler.add_job(func=sync_schedule, trigger="interval", seconds=10)
 bg_scheduler.start()
 
 # Build the database
