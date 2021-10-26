@@ -183,7 +183,7 @@ def get_peers():
                 case_list.add(case_id)
             else:
                 return "Blockchain Verification Failed", STATUS_NOT_FOUND
-        return jsonify({"Cases": list(case_list)}), STATUS_OK
+        return jsonify({"Cases": sorted(list(case_list))}), STATUS_OK
     else:
         # No Cases Found
         return "", STATUS_OK

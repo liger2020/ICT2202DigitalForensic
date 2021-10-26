@@ -303,9 +303,17 @@ def check_twothird():
 
                 # Check log action add user
                 if "AddUser" == log_json["Action"]:
-                    # Add User to case
-                    usercase = UserCase(log_json["Username"], verified_block.case_id)
-                    session.add(usercase)
+                    user_list = log_json["Username"]
+                    for user in user_list:
+                        print(user)
+                        # Check exist
+                        test = session.query(UserCase).filter(UserCase.username == user, UserCase.case_id == verified_block.case_id).first()
+                        if test is not None:
+                            continue
+
+                        # Add User to case
+                        usercase = UserCase(user, verified_block.case_id)
+                        session.add(usercase)
                     session.commit()
                 elif "RemoveUser" == log_json["Action"]:
                     usercase = session.query(UserCase) \
