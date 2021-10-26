@@ -50,7 +50,7 @@ class Block(db.Model):
         self.meta_data = meta_data
         self.log = log
         self.timestamp = datetime.now()
-        self.block_data = "-".join(meta_data) + "-".join(log) + "-" + str(self.timestamp) \
+        self.block_data = str(self.id) + "-" + str(self.block_number) + "-".join(meta_data) + "-".join(log) + "-" + str(self.timestamp) \
                           + "-" + self.previous_block_hash
         self.block_hash = hashlib.sha256(self.block_data.encode()).hexdigest()
         self.status = False
