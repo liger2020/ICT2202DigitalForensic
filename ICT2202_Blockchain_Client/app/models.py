@@ -1,27 +1,18 @@
-from sqlalchemy.orm import relationship
-
 from app import db
-import hashlib
-from datetime import datetime
 
 
-class Base(db.Model):
-    __abstract__ = True
-
-    id = db.Column(db.Integer, primary_key=True)
-    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
-    date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
-
-
-class Peers(Base):
+class Peers(db.Model):
     __tablename__ = "Peers"
     # __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ip_address = db.Column(db.String(15), nullable=False, unique=True)
     port = db.Column(db.SmallInteger, nullable=True)
+    server_type = db.Column(db.String(6), nullable=True)
 
-    def __init__(self, ip_address, port):
+    def __init__(self, ip_address, port, server_type):
         self.ip_address = ip_address
         self.port = port
+        self.server_type = server_type
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -52,8 +43,8 @@ class Pool(db.Model):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-class User_stored_info(db.Model):
-    __tablename__ = "User_stored_info"
+class UserStoredInfo(db.Model):
+    __tablename__ = "UserStoredInfo"
     __table_args__ = {'extend_existing': True}
 
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
