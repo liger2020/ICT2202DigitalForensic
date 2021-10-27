@@ -1,6 +1,7 @@
 import datetime
 import math
 import sys
+import json
 
 from flask import request, jsonify, url_for, g
 from flask_restful import abort
@@ -299,9 +300,18 @@ def caseinfo():
     curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://192.168.75.133:5000/caseinfo -d {\"case_id\":\"1\"}
     """
     case_id = request.json.get('case_id')
-    sql = MetaDataFile.query.filter_by(case_id=case_id).first()
+    print(case_id)
+    sql = Block.query.filter_by(id=case_id).all()
     if sql:
-        return sql.meta_data
+        output = {}
+        i = 0
+        for rows in sql:
+            i += 1
+            rows_as_dict = rows.as_dict()
+            output[i] = rows_as_dict
+        output = json.dumps(output,indent=4, default=str)
+        print(output)
+        return output
     else:
         return "fail, cannot find case_id"
 
