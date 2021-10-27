@@ -145,7 +145,7 @@ class Consensus(db.Model):
 
     consensus_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ip_address = db.Column(db.String(15), nullable=False)
-    pool_id = db.Column(db.Integer, nullable=True)
+    pool_id = db.Column(db.String(15), nullable=True)
     response = db.Column(db.Boolean, nullable=False)
     receive_timestamp = db.Column(db.DateTime, nullable=True)
 

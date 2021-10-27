@@ -226,28 +226,14 @@ def check_twothird():
             number_of_consensuses = [x for x in consensus_list if x.response]
             if len(number_of_consensuses) >= twothird:
                 verified_block = session.query(Pool).filter(Pool.id == pool.id).first()
-                temp = verified_block.case_id
+                temp = verified_block.case_id #Store a temp value 
                 print("Stored temp value: ", temp)
-                # print("Case ID:", str(verified_block.case_id))
-                # print("Block number:", str(verified_block.block_number))
-                # print("meta data:", verified_block.meta_data)
-                # print("log:", verified_block.log)
-                print("last verified hash: ", str(verified_block.previous_block_hash))
-                # print("timestamp:", str(verified_block.timestamp))
-                print("Just verified block:", str(verified_block.block_hash))
-                # verified_block.status = 1
-                # session.commit()
 
-                # DO NOT DELETE
+
                 add_the_block = Block(
                     id=verified_block.case_id,
-                    # block_number=verified_block.block_number,
-                    # previous_block_hash=send_unverified_block.previous_block_hash,
                     meta_data=verified_block.meta_data,
                     log=verified_block.log
-                    # timestamp=send_unverified_block.timestamp,
-                    # block_hash=send_unverified_block.block_hash,
-                    # status=1,
                 )
 
                 add_the_block.block_hash = verified_block.block_hash
@@ -261,25 +247,24 @@ def check_twothird():
                 for remove_consensus in consensus_list:
                     session.delete(remove_consensus)
                 session.commit()
+                
+                # Resetting the count of the pool after the previous pool is verified
+                update_pool = session.query(Pool).filter(Pool.case_id == temp).all()
+                get_new_first_pool = session.query(Pool).filter(Pool.case_id == temp).first()  
+                last_hash_block = Block.query.filter_by(id=temp).order_by(Block.block_number.desc()).first()
+                if update_pool is None:
+                    pass
+                else:
+                    #Changing the first block in the pool with same case ID with the latest block's black_hash
+                    get_new_first_pool.previous_block_hash = last_hash_block.block_hash
+                    get_new_first_pool.block_number = last_hash_block.block_number + 1
+                    session.commit()
 
-                # # Resetting the count of the pool after the previous pool is verified
-                # update_pool = session.query(Pool).filter(Pool.case_id == verified_block.case_id).all()
-                # get_new_first_pool = session.query(Pool).filter(Pool.case_id == temp).first()  
-                # last_hash_block = Block.query.filter_by(id=temp).order_by(Block.block_number.desc()).first()
-                # if update_pool is None:
-                #     pass
-                # else:
-                #     for all in update_pool:
-                #         print("Turning everyone to 0")
-                #         all.count = 0  
-                #     #Changing the first block in the pool with same case ID with the latest block's black_hash
-                #     print("This is get new first pool")
-                #     print("Have stuff in get new first pool")
-                #     get_new_first_pool.previous_block_hash = last_hash_block.block_hash
-                #     print("Get new first pool hash:" , get_new_first_pool.previous_block_hash)
-                #     print("This is the verified block hash: " , last_hash_block.block_hash)
-                #     session.commit()
+                    for all in update_pool:
+                        print("Turning everyone to 0")
+                        all.count = 0 
 
+                    
                 
                 # Sending new verified blocks to clients
                 send_new_verified_to_clients(add_the_block)

@@ -55,20 +55,6 @@ def get_latest_verified():
     return "", STATUS_OK
 
 
-@app.route('/data_extraction', methods=['POST'])
-def check_endpoint2():
-    pool_json = request.get_json()
-    for x in pool_json["Pool"]:
-        pool = json.dumps(x)
-        if pool is None:
-            return {"Format": "Wrong"}
-        else:
-            return pool
-    # result = data['case_id']
-    # out={"result": str(result)}
-    # return json.dumps(out)
-
-
 @app.route('/receivepool', methods=['POST'])
 @auth.login_required
 def receive():
@@ -79,14 +65,16 @@ def receive():
     for pool in pool_json["Pool"]:
         if pool is None:
             return {"Format": "Wrong"}
-        verified = verify(pool)
-        # TODO VERIFY RETURNING NONE
-        resp = {"pool_id": pool.get('case_id'), "response": verified}  # Placeholder
-        print(resp)
-        # Send Response Back to Server
-        peer = Peers(request.remote_addr, 5000, None)
-        thread_pool.submit(send_block, peer, resp, "receive_response")  # send block to user
-        print("after submit")
+        else:
+            print("This is the pool:", str(pool))
+            verified = verify(pool)
+            # TODO VERIFY RETURNING NONE
+            resp = {"pool_id": pool.get('case_id'), "response": verified}  # Placeholder
+            print(resp)
+            # Send Response Back to Server
+            peer = Peers(request.remote_addr, 5000, None)
+            thread_pool.submit(send_block, peer, resp, "receive_response")  # send block to user
+            print("after submit")
 
         return request.remote_addr, STATUS_OK
 

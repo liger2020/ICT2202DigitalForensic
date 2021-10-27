@@ -67,10 +67,10 @@ def receive_response():
     # Placeholder Expected Input: {"pool_id": "2", "response": "yes"}
     # Process Json to Consensus Model Object\
     resp = request.get_json()
-    print(resp)
+    print("This is the response:" , str(resp))
     consensus = convert_to_consensus(resp, request.remote_addr)
     print(consensus)
-    print("This is consensus pool id::" + str(consensus.pool_id))
+    print("This is consensus pool id:" + str(consensus.pool_id))
     if consensus is None:
         # TODO return error code
         return {"error": "very true"}
