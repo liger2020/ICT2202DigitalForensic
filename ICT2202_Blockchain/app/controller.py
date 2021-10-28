@@ -1,15 +1,14 @@
-import json
-
 import hashlib
-from dateutil import parser
+import json
 import math
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
-import requests
-from flask import jsonify
 
-from app import db, app, Session
+import requests
+from dateutil import parser
+
+from app import db, Session
 from app.models import Block, Peers, Pool, Consensus, UserCase, MetaDataFile
 
 SYNC_INTERVAL = 60 * 10  # 10 Mins
@@ -126,7 +125,7 @@ def send_block(peer, data, url):
 
 '''
 User will store Case id and the last block hash of the respective cases they are in.
-When verification is needed, the server will select 51 percent of the people in the case. 
+When verification is needed, the server will select 51 percent of the people in the case.
 These delegates will then verify the hash of the block and return a yes/no respond to the server.
 '''
 
@@ -222,13 +221,14 @@ def check_twothird():
             twothird = math.ceil(selectnumber * 0.66)
             print("This is the deciding factor number:", twothird)
             print("This is the pool id:", str(pool.id))
-            consensus_list = session.query(Consensus).filter(Consensus.pool_id == pool.id, Consensus.response == 1).all()
+            consensus_list = session.query(Consensus) \
+                .filter(Consensus.pool_id == pool.id, Consensus.response == 1) \
+                .all()
             number_of_consensuses = [x for x in consensus_list if x.response]
             if len(number_of_consensuses) >= twothird:
                 verified_block = session.query(Pool).filter(Pool.id == pool.id).first()
-                temp = verified_block.case_id #Store a temp value 
+                temp = verified_block.case_id  # Store a temp value
                 print("Stored temp value: ", temp)
-
 
                 add_the_block = Block(
                     id=verified_block.case_id,
@@ -247,25 +247,23 @@ def check_twothird():
                 for remove_consensus in consensus_list:
                     session.delete(remove_consensus)
                 session.commit()
-                
+
                 # Resetting the count of the pool after the previous pool is verified
                 update_pool = session.query(Pool).filter(Pool.case_id == temp).all()
-                get_new_first_pool = session.query(Pool).filter(Pool.case_id == temp).first()  
+                get_new_first_pool = session.query(Pool).filter(Pool.case_id == temp).first()
                 last_hash_block = Block.query.filter_by(id=temp).order_by(Block.block_number.desc()).first()
                 if update_pool is None:
                     pass
                 else:
-                    #Changing the first block in the pool with same case ID with the latest block's black_hash
+                    # Changing the first block in the pool with same case ID with the latest block's black_hash
                     get_new_first_pool.previous_block_hash = last_hash_block.block_hash
                     get_new_first_pool.block_number = last_hash_block.block_number + 1
                     session.commit()
 
                     for all in update_pool:
                         print("Turning everyone to 0")
-                        all.count = 0 
+                        all.count = 0
 
-                    
-                
                 # Sending new verified blocks to clients
                 send_new_verified_to_clients(add_the_block)
 
@@ -282,7 +280,7 @@ def check_twothird():
                 # commiting to MetaDataFile table
                 queryMeta = session.query(MetaDataFile).filter(MetaDataFile.case_id == verified_block.case_id).first()
                 if queryMeta:
-                     queryMeta.meta_data += "," + metadata_json["File_Name"]
+                    queryMeta.meta_data += "," + metadata_json["File_Name"]
                 else:
                     sqlmeta = metadata_json["File_Name"]
                     sql = MetaDataFile(case_id=verified_block.case_id, meta_data=sqlmeta)
@@ -293,9 +291,10 @@ def check_twothird():
                 if "AddUser" == log_json["Action"]:
                     user_list = log_json["Username"]
                     for user in user_list:
-                        print(user)
                         # Check exist
-                        test = session.query(UserCase).filter(UserCase.username == user, UserCase.case_id == verified_block.case_id).first()
+                        test = session.query(UserCase) \
+                            .filter(UserCase.username == user, UserCase.case_id == verified_block.case_id) \
+                            .first()
                         if test is not None:
                             continue
 
@@ -323,8 +322,8 @@ def verify(case_id):
         if previous_block_hash != block.previous_block_hash:
             return False
 
-        data = "-".join(block.meta_data) + "-".join(block.log) + "-" + str(block.timestamp) \
-               + "-" + block.previous_block_hash
+        data = str(block.id) + "-" + str(block.block_number) + "-".join(block.meta_data) + "-".join(block.log) \
+               + "-" + str(block.timestamp) + "-" + block.previous_block_hash
         block_hash = hashlib.sha256(data.encode()).hexdigest()
         if block_hash != block.block_hash:
             return False
