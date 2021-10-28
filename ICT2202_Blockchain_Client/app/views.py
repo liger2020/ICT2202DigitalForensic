@@ -69,7 +69,7 @@ def receive():
             print("This is the pool:", str(pool))
             verified = verify(pool)
             # TODO VERIFY RETURNING NONE
-            resp = {"pool_id": pool.get('case_id'), "response": verified}  # Placeholder
+            resp = {"pool_id": pool.get('id'), "response": verified}  # Placeholder
             print(resp)
             # Send Response Back to Server
             peer = Peers(request.remote_addr, 5000, None)

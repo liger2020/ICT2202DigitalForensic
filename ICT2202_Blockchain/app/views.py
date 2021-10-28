@@ -7,7 +7,7 @@ from flask import request, jsonify, url_for, g
 from flask_restful import abort
 from flask_httpauth import HTTPTokenAuth
 from app import app, db, auth
-from app.controller import convert_to_pool, convert_to_consensus, verify
+from app.controller import convert_to_pool, convert_to_consensus, verify, send_new_verified_to_clients
 # Import module models
 from app.models import Peers, Block, Pool, Consensus, User, UserCase, MetaDataFile
 
@@ -47,11 +47,15 @@ def receive_block():
             continue
 
         # If case doesnt exist (Block 0) add to block directly
-        exist = Block.query.filter_by(id=block.id).first()
-        if exist:
-            # Add to block
-            # TODO
-            pass
+        exist = Block.query.filter_by(id=block.case_id).first()
+        if exist is None:
+            # Add to Block
+            new_block = Block(block.case_id, block.meta_data, block.log, block_number=block.block_number, previous_block_hash=block.previous_block_hash, timestamp=block.timestamp, block_hash=block.block_hash, status=1)
+            db.session.add(new_block)
+            db.session.commit()
+            
+            # Sending new verified blocks to clients
+            send_new_verified_to_clients(new_block)
         else:
             # Add to Pool
             db.session.add(block)
@@ -67,6 +71,7 @@ def receive_block():
 def receive_response():
     # Placeholder Expected Input: {"pool_id": "2", "response": "yes"}
     # Process Json to Consensus Model Object\
+    print("RICHED")
     resp = request.get_json()
     print("This is the response:" , str(resp))
     consensus = convert_to_consensus(resp, request.remote_addr)
@@ -159,6 +164,7 @@ def sync_receive():
             for block in block_list:
                 data = block.as_dict()
                 output_list.append(data)
+    print("PRINTING: \n{}\n{}\n{}".format(output_list, length, block_list_count))
     return jsonify({"Blocks": output_list, "length": length, "Count": block_list_count})
 
 
@@ -188,78 +194,6 @@ def get_peers():
     else:
         # No Cases Found
         return "", STATUS_OK
-
-
-# @app.route('/peers', methods=['PUT'])
-# def create_peers():
-#     peer = request.get_json()
-#     if "ip_address" not in peer or "port" not in peer:
-#         return 404
-#
-#     peer_obj = Peers(peer["ip_address"], peer["port"])
-#     db.session.add(peer_obj)
-#     db.session.commit()
-#
-#     return peer_obj.as_dict(), STATUS_OK
-#
-#
-# @app.route('/peers', methods=['POST'])
-# def update_peers():
-#     peer = request.get_json()
-#     if "id" not in peer or "ip_address" not in peer or "port" not in peer:
-#         return 404
-#
-#     peer_obj = Peers.query.filter_by(id=peer["id"]).first()
-#     peer_obj.ip_address = peer["ip_address"]
-#     peer_obj.port = peer["port"]
-#
-#     db.session.commit()
-#
-#     return peer, STATUS_OK
-#
-#
-# @app.route('/peers/<peer_ip_address>', methods=['DELETE'])
-# def delete_peers(peer_ip_address):
-#     peer = Peers.query.filter_by(ip_address=str(peer_ip_address)).first_or_404()
-#     db.session.delete(peer)
-#     db.session.commit()
-#
-#     return peer.as_dict(), STATUS_OK
-
-
-@app.route("/getlastblocks")
-def getlastblocks():
-    blocks = [x.as_dict() for x in Block.query.all()]
-    for block in blocks:
-        print(block)
-    # Convert Object to JSON TODO
-    return jsonify(output=blocks), STATUS_OK
-
-
-@app.route("/query")
-def check_query():
-    queries = Block.query.filter_by(id=1).all()
-    for query in queries:
-        print(query)
-
-    return str(query), STATUS_OK
-
-
-@app.route('/send_block', methods=['POST'])
-@auth.login_required
-def send():
-    test = Block(1, meta_data="test", log="test")
-    try:
-        db.session.add(test)
-        db.session.commit()
-    except:
-        db.session.rollback()
-        raise
-    finally:
-        db.session.close()
-
-    return jsonify(output=test), STATUS_OK
-
 
 @auth.verify_token
 def verify_token(token):
@@ -367,4 +301,4 @@ def caseinfo():
 #         if not user or not user.verify_password(password):
 #             return False
 #     g.user = user
-#     return True
+#     return True cae12def59de0081a1ecdc3d8cc4a1bacbc893b5bdffe27921d1acca205d788d

@@ -173,6 +173,7 @@ def request_for_update(peer, case_id, original_block):
 def verify(unverified_block):
     # unverified block is in json format
     caseid = unverified_block.get('case_id')
+    block_num = unverified_block.get('block_number')
     prev_hash = unverified_block.get('previous_block_hash')
     metadata = unverified_block.get('meta_data')
     log = unverified_block.get('log')
@@ -181,10 +182,12 @@ def verify(unverified_block):
     user_block_info = UserStoredInfo.query.filter_by(case_id=caseid).first()
     if user_block_info.last_verified_hash == prev_hash:
         print("HIT 1")
-        verifying = "-".join(metadata) + "-".join(log) + "-" + str(
-            timestamp) \
-                    + "-" + user_block_info.last_verified_hash
+        verifying= caseid + "-" + str(block_num) + "-".join(metadata) + "-".join(log) + "-" + str(timestamp) \
+                          + "-" + user_block_info.last_verified_hash
         verify_block_hash = hashlib.sha256(verifying.encode()).hexdigest()
+        print("TIMESTAMP:", caseid + "-" + str(block_num) + "-".join(metadata) + "-".join(log) + "-" + str(timestamp) \
+                          + "-" + user_block_info.last_verified_hash)
+        print("\nCOMPARE: \n{}\n{}\n".format(verify_block_hash, block_hash))
         if verify_block_hash == block_hash:
             print("HIT 2")
             return 1

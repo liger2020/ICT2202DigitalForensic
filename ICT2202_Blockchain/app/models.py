@@ -35,7 +35,7 @@ class Block(db.Model):
     block_hash = db.Column(db.String(255))
     status = db.Column(db.Boolean)
 
-    def __init__(self, id, meta_data, log):
+    def __init__(self, id, meta_data, log, block_number=None, previous_block_hash=None, timestamp=None, block_hash=None, status=None):
         """
         this for the creation of a new block NOT for the blockchain
         :param id: case number
@@ -45,15 +45,35 @@ class Block(db.Model):
         """
 
         self.id = id
-        self.set_block_number()
+        if block_number is None:
+            self.set_block_number()
+        else:
+            self.block_number = block_number
+            self.previous_block_hash = previous_block_hash
 
         self.meta_data = meta_data
         self.log = log
-        self.timestamp = datetime.now()
-        self.block_data = str(self.id) + "-" + str(self.block_number) + "-".join(meta_data) + "-".join(log) + "-" + str(self.timestamp) \
-                          + "-" + self.previous_block_hash
-        self.block_hash = hashlib.sha256(self.block_data.encode()).hexdigest()
-        self.status = False
+
+        if timestamp is None:
+            self.timestamp = datetime.now()
+        else:
+            self.timestamp = timestamp
+
+        if block_hash is None:
+            block_data = self.id + "-" + \
+            str(self.block_number) + \
+            "-".join(meta_data) + \
+            "-".join(log) + "-" + \
+            str(self.timestamp) + \
+            "-" + self.previous_block_hash
+            self.block_hash = hashlib.sha256(block_data.encode()).hexdigest()
+        else:
+            self.block_hash = block_hash
+
+        if status is None:
+            self.status = False
+        else:
+            self.status = status
 
     def __repr__(self):
         return "id: {}\nblock_number: {}\nprevious_block_hash: {}\nmeta_data: {}\nlog: " \
@@ -82,7 +102,7 @@ class Pool(db.Model):
     __tablename__ = "Pool"
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    case_id = db.Column(db.Integer, nullable=True)
+    case_id = db.Column(db.String(255), nullable=True)
     block_number = db.Column(db.Integer, nullable=True)
     previous_block_hash = db.Column(db.String(255))
     meta_data = db.Column(db.String(255), nullable=True)
@@ -108,12 +128,13 @@ class Pool(db.Model):
         self.meta_data = meta_data
         self.log = log
         self.timestamp = datetime.now()
-        self.block_data = "-".join(meta_data) + "-".join(log) + "-" + str(self.timestamp) \
+        self.block_data = self.case_id + "-" + str(self.block_number) + "-".join(meta_data) + "-".join(log) + "-" + str(self.timestamp) \
                           + "-" + self.previous_block_hash
         self.block_hash = hashlib.sha256(self.block_data.encode()).hexdigest()
         self.status = False
         self.count = 0
         self.sendout_time = None
+        print("\n\nBLOCK_DATA: {}\n\n".format(self.block_data))
 
     def __repr__(self):
         return "case_id: {}\nblock_number: {}\nprevious_block_hash: {}\nmeta_data: {}\nlog: " \
@@ -218,17 +239,17 @@ class MetaDataFile(db.Model):
         self.case_id = case_id
         self.meta_data = meta_data
 
-# class User_stored_info(db.Model):
-#     __tablename__ = "user_stored_info"
-#     __table_args__ = {'extend_existing': True}
+class User_stored_info(db.Model):
+    __tablename__ = "user_stored_info"
+    __table_args__ = {'extend_existing': True}
 
-#     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     case_id = db.Column(db.String(15), nullable=False)
-#     last_verified_hash = db.Column(db.String(255))
+    user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    case_id = db.Column(db.String(15), nullable=False)
+    last_verified_hash = db.Column(db.String(255))
 
-#     def __init__(self, case_id, last_verified_hash):
-#         self.case_id = case_id
-#         self.last_verified_hash = last_verified_hash
+    def __init__(self, case_id, last_verified_hash):
+        self.case_id = case_id
+        self.last_verified_hash = last_verified_hash
 
-#     def as_dict(self):
-#         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

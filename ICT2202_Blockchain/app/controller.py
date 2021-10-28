@@ -17,21 +17,13 @@ TIMEOUT = 30
 
 def convert_to_block(json_block):
     try:
-        block = Block(json_block["id"], json_block["meta_data"], json_block["log"])
-        if "block_number" in json_block and "previous_block_hash" in json_block and "timestamp" in json_block and "block_hash" in json_block:
-            block.id = json_block["id"]
-            block.block_number = json_block["block_number"]
-            block.previous_block_hash = json_block["previous_block_hash"]
-            block.meta_data = json_block["meta_data"]
-            block.log = json_block["log"]
-            if isinstance(json_block["timestamp"], str):
-                block.timestamp = parser.parse(json_block["timestamp"])
-            else:
-                block.timestamp = json_block["timestamp"]
-            block.block_hash = json_block["block_hash"]
-            block.status = json_block["status"]
+        timestamp = json_block.get("timestamp")
+        if timestamp is not None:
+            timestamp = parser.parse(json_block["timestamp"])
+        
+        block = Block(json_block["id"], json_block["meta_data"], json_block["log"], block_number=json_block.get("block_number"), previous_block_hash=json_block.get("previous_block_hash"), block_hash=json_block.get("block_hash"), status=json_block.get("status"))
         return block
-    except KeyError:
+    except KeyError():
         return None
 
 
@@ -39,7 +31,7 @@ def convert_to_pool(json_block):
     try:
         block = Pool(json_block["case_id"], json_block["meta_data"], json_block["log"])
         if "block_number" in json_block and "previous_block_hash" in json_block and "timestamp" in json_block and "block_hash" in json_block:
-            block.id = json_block["case_id"]
+            block.case_id = json_block["case_id"]
             block.block_number = json_block["block_number"]
             block.previous_block_hash = json_block["previous_block_hash"]
             block.meta_data = json_block["meta_data"]
@@ -233,12 +225,12 @@ def check_twothird():
                 add_the_block = Block(
                     id=verified_block.case_id,
                     meta_data=verified_block.meta_data,
-                    log=verified_block.log
+                    log=verified_block.log,
+                    block_hash = verified_block.block_hash,
+                    timestamp = verified_block.timestamp,
+                    status = 1
                 )
 
-                add_the_block.block_hash = verified_block.block_hash
-                add_the_block.timestamp = verified_block.timestamp
-                add_the_block.status = 1
                 print("adding block ....")
                 session.add(add_the_block)
                 remove_old_pool = session.query(Pool).filter(Pool.id == verified_block.id).first()
@@ -250,19 +242,28 @@ def check_twothird():
 
                 # Resetting the count of the pool after the previous pool is verified
                 update_pool = session.query(Pool).filter(Pool.case_id == temp).all()
-                get_new_first_pool = session.query(Pool).filter(Pool.case_id == temp).first()
+                
                 last_hash_block = Block.query.filter_by(id=temp).order_by(Block.block_number.desc()).first()
                 if update_pool is None:
                     pass
-                else:
-                    # Changing the first block in the pool with same case ID with the latest block's black_hash
-                    get_new_first_pool.previous_block_hash = last_hash_block.block_hash
-                    get_new_first_pool.block_number = last_hash_block.block_number + 1
-                    session.commit()
-
+                else: 
                     for all in update_pool:
+                        all_consensus = session.query(Consensus).filter(Consensus.pool_id == all.id).all()
+                        # Changing the first block in the pool with same case ID with the latest block's black_hash
+                        for x in all_consensus:
+                            session.delete(x)
+
                         print("Turning everyone to 0")
+                        all.previous_block_hash = last_hash_block.block_hash
+                        all.block_number = last_hash_block.block_number + 1
+                        block_data = all.case_id + "-" + str(all.block_number) + "-".join(all.meta_data) + "-".join(all.log) + "-" + str(all.timestamp) \
+                          + "-" + all.previous_block_hash
+
+                        all.block_hash = hashlib.sha256(block_data.encode()).hexdigest()
+                        all.sendout_time = datetime.now()
                         all.count = 0
+
+                        session.commit()
 
                 # Sending new verified blocks to clients
                 send_new_verified_to_clients(add_the_block)
@@ -340,7 +341,7 @@ def send_unverified_block():
     list_of_users = randomselect()
     thread_pool = ThreadPoolExecutor(5)  # 5 Worker Threads
     for block in list_of_unverified:
-        data = {"Pool": [{"id": block.id, "case_id": block.case_id, "meta_data": block.meta_data, "log": block.log,
+        data = {"Pool": [{"id": block.id, "case_id": block.case_id, "block_number": block.block_number, "meta_data": block.meta_data, "log": block.log,
                           "timestamp": str(block.timestamp),
                           "previous_block_hash": block.previous_block_hash, "block_hash": block.block_hash}]
                 }
