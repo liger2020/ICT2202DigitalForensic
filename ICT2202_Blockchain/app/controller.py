@@ -278,16 +278,6 @@ def check_twothird():
                 metadata_json = json.loads(verified_block.meta_data)
                 log_json = json.loads(verified_block.log)
 
-                # commiting to MetaDataFile table
-                queryMeta = session.query(MetaDataFile).filter(MetaDataFile.case_id == verified_block.case_id).first()
-                if queryMeta:
-                    queryMeta.meta_data += "," + metadata_json["File_Name"]
-                else:
-                    sqlmeta = metadata_json["File_Name"]
-                    sql = MetaDataFile(case_id=verified_block.case_id, meta_data=sqlmeta)
-                    session.add(sql)
-                session.commit()
-
                 # Check log action add user
                 if "AddUser" == log_json["Action"]:
                     user_list = log_json["Username"]
