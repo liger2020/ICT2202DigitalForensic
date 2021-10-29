@@ -260,7 +260,7 @@ def check_twothird():
                           + "-" + all.previous_block_hash
 
                         all.block_hash = hashlib.sha256(block_data.encode()).hexdigest()
-                        all.sendout_time = datetime.now()
+                        all.sendout_time = None
                         all.count = 0
 
                         session.commit()
