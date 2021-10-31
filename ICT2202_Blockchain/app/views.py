@@ -237,16 +237,10 @@ def caseinfo():
     curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://192.168.75.133:5000/caseinfo -d {\"case_id\":\"1\"}
     """
     case_id = request.json.get('case_id')
-    print(case_id)
     sql = Block.query.filter_by(id=case_id).all()
+    sql = [x.as_dict() for x in sql]
     if sql:
-        output = {}
-        i = 0
-        for rows in sql:
-            i += 1
-            rows_as_dict = rows.as_dict()
-            output[i] = rows_as_dict
-        return jsonify(output)
+        return jsonify(Blocks=sql)
     else:
         return "fail, cannot find case_id"
 
