@@ -137,14 +137,13 @@ def request_for_update(peer, case_id, original_block):
         blocks = resp_json["Blocks"]
         # Sort by block number
         blocks = sorted(blocks, key=lambda x: x["block_number"])
-
+        
         if original_block is None:
-            previous_hash = None
+            previous_hash = ""
             last_length = 0
         else:
             previous_hash = original_block.last_verified_hash
             last_length = original_block.length
-
         for block_json in blocks:
             block_json_id = block_json["id"]
             block_json_previous_hash = block_json["previous_hash"]
@@ -182,10 +181,10 @@ def verify(unverified_block):
     user_block_info = UserStoredInfo.query.filter_by(case_id=caseid).first()
     if user_block_info.last_verified_hash == prev_hash:
         print("HIT 1")
-        verifying= caseid + "-" + str(block_num) + "-".join(metadata) + "-".join(log) + "-" + str(timestamp) \
+        verifying = caseid + "-" + str(block_num) + "-" + metadata + "-" + log + "-" + str(timestamp) \
                           + "-" + user_block_info.last_verified_hash
         verify_block_hash = hashlib.sha256(verifying.encode()).hexdigest()
-        print("TIMESTAMP:", caseid + "-" + str(block_num) + "-".join(metadata) + "-".join(log) + "-" + str(timestamp) \
+        print("TIMESTAMP:", caseid + "-" + str(block_num) + "-" + metadata + "-" + log + "-" + str(timestamp) \
                           + "-" + user_block_info.last_verified_hash)
         print("\nCOMPARE: \n{}\n{}\n".format(verify_block_hash, block_hash))
         if verify_block_hash == block_hash:

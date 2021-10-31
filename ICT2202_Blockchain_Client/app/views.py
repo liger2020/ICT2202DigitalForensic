@@ -68,7 +68,6 @@ def receive():
         else:
             print("This is the pool:", str(pool))
             verified = verify(pool)
-            # TODO VERIFY RETURNING NONE
             resp = {"pool_id": pool.get('id'), "response": verified}  # Placeholder
             print(resp)
             # Send Response Back to Server
