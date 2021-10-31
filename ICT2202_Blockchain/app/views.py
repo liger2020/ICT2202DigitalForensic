@@ -87,17 +87,20 @@ def receive_response():
     if pool is not None:
         print("HIT 1")
         response_timestamp = pool.sendout_time
-        if (response_timestamp + datetime.timedelta(seconds=TIMEOUT)) >= datetime.datetime.now():
-            # Add to consensus Table TODO Add checks
-            consent = Consensus.query.filter_by(ip_address=consensus.ip_address,pool_id=consensus.pool_id).first()
-            if consent is None:
-                db.session.add(consensus)
-                db.session.commit()
+        try:
+            if (response_timestamp + datetime.timedelta(seconds=TIMEOUT)) >= datetime.datetime.now():
+                # Add to consensus Table TODO Add checks
+                consent = Consensus.query.filter_by(ip_address=consensus.ip_address,pool_id=consensus.pool_id).first()
+                if consent is None:
+                    db.session.add(consensus)
+                    db.session.commit()
+                else:
+                    consent.receive_timestamp = consensus.receive_timestamp
+                    db.session.commit()
             else:
-                consent.receive_timestamp = consensus.receive_timestamp
-                db.session.commit()
-        else:
-            # Discard (TIMED OUT)
+                # Discard (TIMED OUT)
+                pass
+        except:
             pass
     else:
         print("HIt 2")

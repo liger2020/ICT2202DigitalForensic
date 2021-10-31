@@ -1,3 +1,5 @@
+import json
+
 from app import db, app
 import hashlib
 from datetime import datetime
@@ -60,12 +62,8 @@ class Block(db.Model):
             self.timestamp = timestamp
 
         if block_hash is None:
-            block_data = self.id + "-" + \
-            str(self.block_number) + \
-            "-".join(meta_data) + \
-            "-".join(log) + "-" + \
-            str(self.timestamp) + \
-            "-" + self.previous_block_hash
+            block_data = self.case_id + "-" + str(self.block_number) + "-" + self.meta_data + "-" + self.log + "-" + \
+                         str(self.timestamp) + "-" + self.previous_block_hash
             self.block_hash = hashlib.sha256(block_data.encode()).hexdigest()
         else:
             self.block_hash = block_hash
@@ -128,7 +126,7 @@ class Pool(db.Model):
         self.meta_data = meta_data
         self.log = log
         self.timestamp = datetime.now()
-        self.block_data = self.case_id + "-" + str(self.block_number) + "-".join(meta_data) + "-".join(log) + "-" + str(self.timestamp) \
+        self.block_data = self.case_id + "-" + str(self.block_number) + "-" + self.meta_data + "-" + self.log + "-" + str(self.timestamp) \
                           + "-" + self.previous_block_hash
         self.block_hash = hashlib.sha256(self.block_data.encode()).hexdigest()
         self.status = False

@@ -21,7 +21,7 @@ def convert_to_block(json_block):
         if timestamp is not None:
             timestamp = parser.parse(json_block["timestamp"])
         
-        block = Block(json_block["id"], json_block["meta_data"], json_block["log"], block_number=json_block.get("block_number"), previous_block_hash=json_block.get("previous_block_hash"), block_hash=json_block.get("block_hash"), status=json_block.get("status"))
+        block = Block(json_block["id"], json.dumps(json_block["meta_data"]), json.dumps(json_block["log"]), block_number=json_block.get("block_number"), previous_block_hash=json_block.get("previous_block_hash"), block_hash=json_block.get("block_hash"), status=json_block.get("status"))
         return block
     except KeyError():
         return None
@@ -29,7 +29,7 @@ def convert_to_block(json_block):
 
 def convert_to_pool(json_block):
     try:
-        block = Pool(json_block["case_id"], json_block["meta_data"], json_block["log"])
+        block = Pool(json_block["case_id"], json.dumps(json_block["meta_data"]), json.dumps(json_block["log"]))
         if "block_number" in json_block and "previous_block_hash" in json_block and "timestamp" in json_block and "block_hash" in json_block:
             block.case_id = json_block["case_id"]
             block.block_number = json_block["block_number"]
