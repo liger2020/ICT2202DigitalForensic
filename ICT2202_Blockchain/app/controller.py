@@ -20,7 +20,7 @@ def convert_to_block(json_block):
         timestamp = json_block.get("timestamp")
         if timestamp is not None:
             timestamp = parser.parse(json_block["timestamp"])
-        
+
         block = Block(json_block["id"], json.dumps(json_block["meta_data"]), json.dumps(json_block["log"]), block_number=json_block.get("block_number"), previous_block_hash=json_block.get("previous_block_hash"), block_hash=json_block.get("block_hash"), status=json_block.get("status"))
         return block
     except KeyError():
@@ -313,7 +313,7 @@ def verify(case_id):
         if previous_block_hash != block.previous_block_hash:
             return False
 
-        data = str(block.id) + "-" + str(block.block_number) + "-".join(block.meta_data) + "-".join(block.log) \
+        data = str(block.id) + "-" + str(block.block_number) + "-" + block.meta_data + "-" + block.log \
                + "-" + str(block.timestamp) + "-" + block.previous_block_hash
         block_hash = hashlib.sha256(data.encode()).hexdigest()
         if block_hash != block.block_hash:
