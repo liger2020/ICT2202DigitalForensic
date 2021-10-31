@@ -246,9 +246,7 @@ def caseinfo():
             i += 1
             rows_as_dict = rows.as_dict()
             output[i] = rows_as_dict
-        output = json.dumps(output,indent=4, default=str)
-        print(output)
-        return output
+        return jsonify(output)
     else:
         return "fail, cannot find case_id"
 
