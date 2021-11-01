@@ -94,7 +94,6 @@ def get_live_peers(servertype):
 def send_block(peer, data, url):
     url = "http://{}:{}/{}".format(peer.ip_address, peer.port, url)
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain', "Authorization": "Bearer secret-token-1"}
-    print(data)
     if data == "":
         r = requests.get(url, headers=headers, timeout=3)
         return r
@@ -127,7 +126,6 @@ def randomselect():
     numberofpeer = len(peer_list)
     fiftyone = math.ceil(numberofpeer * 0.51)
     delegates = random.sample(peer_list, fiftyone)
-    # print(delegates)
     return delegates  # List of user to give their consensus.
 
 
@@ -207,12 +205,8 @@ def check_twothird():
         if pool.sendout_time + timedelta(seconds=TIMEOUT) >= datetime.now():
             # Check if id has 2/3 >, add to block
             numberofpeer = len(session.query(Peers).filter(Peers.server_type == "client").all())
-            print("This is the number of peer:", str(numberofpeer))
             selectnumber = math.ceil(numberofpeer * 0.51)
-            print("This is the select number:", str(selectnumber))
             twothird = math.ceil(selectnumber * 0.66)
-            print("This is the deciding factor number:", twothird)
-            print("This is the pool id:", str(pool.id))
             consensus_list = session.query(Consensus) \
                 .filter(Consensus.pool_id == pool.id, Consensus.response == 1) \
                 .all()
@@ -220,7 +214,6 @@ def check_twothird():
             if len(number_of_consensuses) >= twothird:
                 verified_block = session.query(Pool).filter(Pool.id == pool.id).first()
                 temp = verified_block.case_id  # Store a temp value
-                print("Stored temp value: ", temp)
 
                 add_the_block = Block(
                     id=verified_block.case_id,
@@ -231,7 +224,6 @@ def check_twothird():
                     status = 1
                 )
 
-                print("adding block ....")
                 session.add(add_the_block)
                 remove_old_pool = session.query(Pool).filter(Pool.id == verified_block.id).first()
                 session.delete(remove_old_pool)
@@ -253,7 +245,6 @@ def check_twothird():
                         for x in all_consensus:
                             session.delete(x)
 
-                        print("Turning everyone to 0")
                         all.previous_block_hash = last_hash_block.block_hash
                         all.block_number = last_hash_block.block_number + 1
                         block_data = all.case_id + "-" + str(all.block_number) + "-".join(all.meta_data) + "-".join(all.log) + "-" + str(all.timestamp) \
@@ -301,7 +292,7 @@ def check_twothird():
                 else:
                     pass
             else:
-                print("Fail")
+                return "Fail"
 
     Session.remove()
 
@@ -363,11 +354,3 @@ def send_unverified_block():
 
     Session.remove()
 
-# send_unverified_block()
-# print(verify("1"))
-# randomselect()
-
-
-# a = Peers("192.168.75.133", 5000)
-# print(a.as_dict())
-# print(send_block(a, "", "/api/test"))
