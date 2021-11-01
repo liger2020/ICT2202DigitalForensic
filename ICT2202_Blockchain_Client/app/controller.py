@@ -1,3 +1,6 @@
+"""
+Functions to be called
+"""
 import json.decoder
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -9,6 +12,17 @@ from app.models import Pool, Peers, UserStoredInfo
 
 
 def check_health(peer):
+    """Return response of target
+
+    Check if the target machine is online by requesting from "/health" on the machine
+
+    :param peer: Peer object of the target
+    :type peer: Peers
+    :returns:
+        - Online - Target Peer
+        - Offline - None
+    :rtype: Peers
+    """
     try:
         resp = requests.get("http://{}:{}/health".format(peer.ip_address, peer.port), timeout=3)
         if resp.status_code == 200:
@@ -20,6 +34,15 @@ def check_health(peer):
 
 
 def get_live_peers():
+    """Returns list of online
+
+    Returns a list of all peers that is online from the database.
+
+    :param servertype: "server"/"client" to check
+    :type servertype: str
+    :return: List of All Peers that is online
+    :rtype: list
+    """
     # Check peers alive
     live_peers = []
     futures = []
@@ -42,6 +65,20 @@ def get_live_peers():
 
 
 def send_block(peer, data, url):
+    """
+    A function to send data to target
+
+    :param peer: Machine to sent to
+    :type peer: Peers
+    :param data: Json data to be sent
+    :type data: dict
+    :param url: The target link to be sent to
+    :type url: str
+    :return: The response of the request sent
+    :rtype:
+        - "get" - Response
+        - "post" - dict
+    """
     url = "http://{}:{}/{}".format(peer.ip_address, peer.port, url)
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain', "Authorization": "Bearer secret-token-1"}
     if data == "":
@@ -65,6 +102,14 @@ def send_block(peer, data, url):
 
 
 def convert_to_user_stored_info(json_block):
+    """
+    Check is json is formatted correctly for User Stored Info Model
+
+    :param json_block: Json String
+    :type json_block: str
+    :return: UserStoredInfo model
+    :rtype: UserStoredInfo
+    """
     try:
         block = UserStoredInfo(json_block["id"], json_block["block_hash"], json_block["block_number"] + 1)
         return block
@@ -85,6 +130,9 @@ def convert_to_pool(json_block):
 
 
 def sync_schedule():
+    """
+    Syncing scheduled to run frequently to ensure the database is updated with nodes
+    """
     thread_pool = ThreadPoolExecutor(5)  # 5 Worker Threads
 
     live_peers = get_live_peers()
@@ -93,6 +141,12 @@ def sync_schedule():
 
 
 def send_sync(peer):
+    """
+    Sending query to nodes to determine if current database is outdated. If outdated request from them.
+
+    :param peer: Target machine ip and port
+    :type peer: Peers
+    """
     thread_pool = ThreadPoolExecutor(5)  # 5 Worker Threads
 
     # Ask for his length
@@ -125,6 +179,16 @@ def send_sync(peer):
 
 
 def request_for_update(peer, case_id, original_block):
+    """
+    Request for new blocks from nodes and do some basic check if data receive is correct
+
+    :param peer: Target machines to sent to
+    :type peer: Peers
+    :param case_id: CaseID of the case
+    :type case_id: str
+    :param original_block: UserStoredInfo model with last hash, length and hash
+    :type original_block: UserStoredInfo
+    """
     if original_block is None:
         data = {"id": case_id, "length": 0, "last": 1}
     else:

@@ -1,12 +1,14 @@
-import json
+"""
+The webpage routing of flask server
+"""
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
-from flask import request, jsonify
+from flask import request
 
 from app import app, db, auth
 from app.controller import send_block, verify
-from app.models import Pool, UserStoredInfo, Peers
+from app.models import UserStoredInfo, Peers
 
 STATUS_OK = 200
 STATUS_NOT_FOUND = 404
@@ -20,6 +22,14 @@ tokens = {
 
 @app.route("/health")
 def current_health():
+    """
+    Return health of current server
+
+    :return: Python version, Platform and Health
+    :rtype:
+        - dict
+        - Status 200
+    """
     resp = {"Python_version": sys.version,
             "Platform": sys.platform,
             "Health": "Good"}
@@ -29,6 +39,14 @@ def current_health():
 @app.route("/sync", methods=["POST"])
 @auth.login_required
 def get_latest_verified():
+    """
+    Receives latest block through sync
+
+    :return: Whether sync succeeded
+    :rtype:
+        - Success - Status 200
+        - Failure - Status 404
+    """
     # {"case_id": "1", "previous_hash": "123", "last_verified_hash":"123", "length":"2"}
     sync_json = request.get_json()
     if "case_id" not in sync_json or "previous_hash" not in sync_json or "last_verified_hash" not in sync_json or "length" not in sync_json:
