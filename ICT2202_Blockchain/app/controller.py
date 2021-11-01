@@ -43,6 +43,14 @@ def convert_to_block(json_block):
 
 
 def convert_to_pool(json_block):
+    """
+    Return given data into pool format
+
+    :param json_block: the data given by user, must contain case_id, meta_data and log
+    :type json_block: json
+    :return: Pool object
+    :rtype: None if failed
+    """
     try:
         block = Pool(json_block["case_id"], json.dumps(json_block["meta_data"]), json.dumps(json_block["log"]))
         if "block_number" in json_block and "previous_block_hash" in json_block and "timestamp" in json_block and "block_hash" in json_block:
@@ -63,6 +71,14 @@ def convert_to_pool(json_block):
 
 
 def convert_to_consensus(json_block, ip_address):
+    """
+    Return given data into block format
+
+    :param json_block: the data given by user, must contain ip_address, pool_id and response
+    :type json_block: json
+    :return: Consensus object
+    :rtype: None if failed
+    """
     try:
         consensus = Consensus(ip_address, json_block["pool_id"], json_block["response"])
         return consensus

@@ -8,7 +8,6 @@ from flask import request, jsonify
 
 from app import app, db, auth
 from app.controller import convert_to_pool, convert_to_consensus, verify, send_new_verified_to_clients
-# Import module models
 from app.models import Block, Pool, Consensus, UserCase
 
 STATUS_OK = 200
