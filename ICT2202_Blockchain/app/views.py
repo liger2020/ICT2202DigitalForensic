@@ -250,8 +250,8 @@ def assignedCase():
         - Success - dictionary, 200
         - Failure - str, fail
 
-    For testing: curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://{your ip}:5000/userAssignedCase -d {\"username\":\"test2\"}
     """
+    # For testing: curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://{your ip}:5000/userAssignedCase -d {\"username\":\"test2\"}
     username = request.json.get('username')
     if username is None:
         return "failed, username is None"
@@ -272,9 +272,8 @@ def caseinfo():
     :rtype:
         - Success - dictionary, 200
         - Failure - str, "fail, cannot find case_id"
-
-    For testing: curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://{your ip }:5000/caseinfo -d {\"case_id\":\"1\"}
     """
+    #For testing: curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://{your ip }:5000/caseinfo -d {\"case_id\":\"1\"}
     case_id = request.json.get('case_id')
     sql = Block.query.filter_by(id=case_id).all()
     sql = [x.as_dict() for x in sql]
