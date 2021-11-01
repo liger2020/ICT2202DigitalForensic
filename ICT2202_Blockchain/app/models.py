@@ -44,6 +44,9 @@ class Peers(db.Model):
 
 
 class Block(db.Model):
+    """
+    Keeps database of the blockchain itself
+    """
     __tablename__ = "Block"
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.String(255), primary_key=True)
@@ -103,9 +106,15 @@ class Block(db.Model):
                                                                       self.status)
 
     def as_dict(self):
+        """
+        return Block object as dictionary
+        """
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     def set_block_number(self):
+        """
+        return block_number given id, if id is does not exist block_number is 0 else it is the next increment
+        """
         result = Block.query.filter_by(id=self.id).order_by(Block.block_number.desc()).first()
         if result is None:
             self.block_number = 0
@@ -229,14 +238,3 @@ class UserCase(db.Model):
         :rtype: dict
         """
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-
-class MetaDataFile(db.Model):
-    __tablename__ = "MetaDataFile"
-    __table_args__ = {'extend_existing': True}
-    case_id = db.Column(db.String(15), nullable=False, primary_key=True)
-    meta_data = db.Column(db.String(15), nullable=False)
-
-    def __init__(self, case_id, meta_data):
-        self.case_id = case_id
-        self.meta_data = meta_data

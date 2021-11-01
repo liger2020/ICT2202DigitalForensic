@@ -19,6 +19,14 @@ TIMEOUT = 30
 
 
 def convert_to_block(json_block):
+    """
+    Return given data into block format
+
+    :param json_block: the data given by user, must contain id, meta_data and log
+    :type json_block: json
+    :return: Block object
+    :rtype: None if failed
+    """
 
     try:
         timestamp = json_block.get("timestamp")
