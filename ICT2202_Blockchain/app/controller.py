@@ -172,6 +172,9 @@ These delegates will then verify the hash of the block and return a yes/no respo
 def randomselect():
     """
     This function will select 51 percent of the user in the system for verification of the block
+    
+    :return: The delegates selected for voting
+    :rtype: list
     """
     peer_list = Peers.query.all()
     numberofpeer = len(peer_list)
@@ -346,6 +349,11 @@ def check_twothird():
 def verify(case_id):
     """
     A function used to verify if the case id exist in the system. 
+
+    :param case_id: case_id in the table
+    :type case_id: str
+    :return: A true/false statement on whether the case id exist
+    :rtype: Boolean 
     """
     blocks = Block.query.filter_by(id=case_id).order_by(Block.block_number.asc()).all()
     previous_block_hash = ""
