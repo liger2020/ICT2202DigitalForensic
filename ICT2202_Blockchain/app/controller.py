@@ -127,7 +127,9 @@ def send_block(peer, data, url):
     :param url: The target link to be sent to
     :type url: str
     :return: The response of the request sent
-    :rtype: dict
+    :rtype:
+        - "get" - Response
+        - "post" - dict
     """
     url = "http://{}:{}/{}".format(peer.ip_address, peer.port, url)
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain', "Authorization": "Bearer secret-token-1"}
@@ -173,7 +175,7 @@ def sync_schedule():
     live_peers = get_live_peers("server")
     for peer in live_peers:
         # Ask for his length
-        resp = send_block(peer, {}, "sync")
+        resp = send_block(peer, "", "sync")
         if resp.status_code != 200:
             continue
 

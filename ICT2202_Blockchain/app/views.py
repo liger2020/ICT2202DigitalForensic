@@ -114,6 +114,12 @@ def receive_response():
 @app.route('/sync')
 @auth.login_required
 def sync():
+    """
+    Return the length of blockchain for syncing
+
+    :return: Case ID's length and last_hash
+    :rtype: json
+    """
     output = []
     id_list = Block.query.with_entities(Block.id).distinct()
     for case_id in id_list:
@@ -130,6 +136,12 @@ def sync():
 @app.route('/sync', methods=['POST'])
 @auth.login_required
 def sync_receive():
+    """
+    Send missing blocks back to the machine requesting it
+
+    :return: Blocks missing, Length of Blockchain and Number of blocks sending
+    :rtype: json
+    """
     resp = request.get_json()
     # Make sure json is valid
     if "id" not in resp or "length" not in resp or "last" not in resp:
@@ -164,7 +176,6 @@ def sync_receive():
             for block in block_list:
                 data = block.as_dict()
                 output_list.append(data)
-    print("PRINTING: \n{}\n{}\n{}".format(output_list, length, block_list_count))
     return jsonify({"Blocks": output_list, "length": length, "Count": block_list_count})
 
 
@@ -172,6 +183,14 @@ def sync_receive():
 @app.route('/usercase', methods=['POST'])
 @auth.login_required
 def get_peers():
+    """
+    Returns list of assigned cases of the user
+
+    :return: List of caseid
+    :rtype:
+        - Success - list, 200
+        - Failure - str, 404
+    """
     case_list = set()
 
     post_data = request.get_json()
