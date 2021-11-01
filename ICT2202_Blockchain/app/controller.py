@@ -1,3 +1,6 @@
+"""
+Functions to be called
+"""
 import hashlib
 import json
 import math
@@ -9,7 +12,7 @@ import requests
 from dateutil import parser
 
 from app import db, Session
-from app.models import Block, Peers, Pool, Consensus, UserCase, MetaDataFile
+from app.models import Block, Peers, Pool, Consensus, UserCase
 
 SYNC_INTERVAL = 60 * 10  # 10 Mins
 TIMEOUT = 30
@@ -21,7 +24,10 @@ def convert_to_block(json_block):
         if timestamp is not None:
             timestamp = parser.parse(json_block["timestamp"])
 
-        block = Block(json_block["id"], json.dumps(json_block["meta_data"]), json.dumps(json_block["log"]), block_number=json_block.get("block_number"), previous_block_hash=json_block.get("previous_block_hash"), block_hash=json_block.get("block_hash"), status=json_block.get("status"))
+        block = Block(json_block["id"], json.dumps(json_block["meta_data"]), json.dumps(json_block["log"]),
+                      block_number=json_block.get("block_number"),
+                      previous_block_hash=json_block.get("previous_block_hash"), timestamp=timestamp,
+                      block_hash=json_block.get("block_hash"), status=json_block.get("status"))
         return block
     except KeyError():
         return None
@@ -47,7 +53,6 @@ def convert_to_pool(json_block):
         return None
 
 
-# Placeholder TODO
 def convert_to_consensus(json_block, ip_address):
     try:
         consensus = Consensus(ip_address, json_block["pool_id"], json_block["response"])
@@ -59,6 +64,17 @@ def convert_to_consensus(json_block, ip_address):
 
 
 def check_health(peer):
+    """Return response of target
+
+    Check if the target machine is online by requesting from "/health" on the machine
+
+    :param peer: Peer object of the target
+    :type peer: Peers
+    :returns:
+        - Online - Target Peer
+        - Offline - None
+    :rtype: Peers
+    """
     try:
         resp = requests.get("http://{}:{}/health".format(peer.ip_address, peer.port), timeout=3)
         if resp.status_code == 200:
@@ -70,6 +86,15 @@ def check_health(peer):
 
 
 def get_live_peers(servertype):
+    """Returns list of online
+
+    Returns a list of all peers that is online from the database.
+
+    :param servertype: "server"/"client" to check
+    :type servertype: str
+    :return: List of All Peers that is online
+    :rtype: list
+    """
     # Check peers alive
     live_peers = []
     futures = []
@@ -92,6 +117,18 @@ def get_live_peers(servertype):
 
 
 def send_block(peer, data, url):
+    """
+    A function to send data to target
+
+    :param peer: Machine to sent to
+    :type peer: Peers
+    :param data: Json data to be sent
+    :type data: dict
+    :param url: The target link to be sent to
+    :type url: str
+    :return: The response of the request sent
+    :rtype: dict
+    """
     url = "http://{}:{}/{}".format(peer.ip_address, peer.port, url)
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain', "Authorization": "Bearer secret-token-1"}
     if data == "":
@@ -130,10 +167,13 @@ def randomselect():
 
 
 def sync_schedule():
+    """
+    Syncing scheduled to run frequently to ensure the database is updated with other nodes
+    """
     live_peers = get_live_peers("server")
     for peer in live_peers:
         # Ask for his length
-        resp = send_block(peer, "", "sync")
+        resp = send_block(peer, {}, "sync")
         if resp.status_code != 200:
             continue
 
@@ -143,7 +183,7 @@ def sync_schedule():
             continue
 
         # Check length received
-        for length_json in resp_json["Blocks"]:
+        for length_json in resp_json.get("Blocks"):
             # Make sure json is valid
             if "id" not in length_json or "length" not in length_json or "last" not in length_json:
                 continue
@@ -166,7 +206,7 @@ def sync_schedule():
 
             if resp["Status_Code"] == 200:
                 resp_json = resp["Answer"]
-                for block_json in resp_json["Blocks"]:
+                for block_json in resp_json.get("Blocks"):
                     block = convert_to_block(block_json)
                     db.session.add(block)
 
@@ -178,6 +218,12 @@ def sync_schedule():
 
 
 def send_new_verified_to_clients(add_the_block):
+    """
+    Sends new blocks to all clients.
+
+    :param add_the_block: The new verified block
+    :type add_the_block: Block
+    """
     pool = ThreadPoolExecutor(5)  # 5 Worker Threads
 
     data = {
@@ -193,6 +239,10 @@ def send_new_verified_to_clients(add_the_block):
 
 # !!! Native SQLAlchemy Syntax !!!
 def check_twothird():
+    """
+    A scheduled function to check if unverified block have meet the requirements and those that meet the requirements
+    gets added as a block
+    """
     session = Session()
 
     # Get all Unverified Blocks
@@ -219,9 +269,9 @@ def check_twothird():
                     id=verified_block.case_id,
                     meta_data=verified_block.meta_data,
                     log=verified_block.log,
-                    block_hash = verified_block.block_hash,
-                    timestamp = verified_block.timestamp,
-                    status = 1
+                    block_hash=verified_block.block_hash,
+                    timestamp=verified_block.timestamp,
+                    status=1
                 )
 
                 session.add(add_the_block)
@@ -234,25 +284,23 @@ def check_twothird():
 
                 # Resetting the count of the pool after the previous pool is verified
                 update_pool = session.query(Pool).filter(Pool.case_id == temp).all()
-                
+
                 last_hash_block = Block.query.filter_by(id=temp).order_by(Block.block_number.desc()).first()
-                if update_pool is None:
-                    pass
-                else: 
-                    for all in update_pool:
-                        all_consensus = session.query(Consensus).filter(Consensus.pool_id == all.id).all()
+                if update_pool is not None:
+                    for all_pool in update_pool:
+                        all_consensus = session.query(Consensus).filter(Consensus.pool_id == all_pool.id).all()
                         # Changing the first block in the pool with same case ID with the latest block's black_hash
                         for x in all_consensus:
                             session.delete(x)
 
-                        all.previous_block_hash = last_hash_block.block_hash
-                        all.block_number = last_hash_block.block_number + 1
-                        block_data = all.case_id + "-" + str(all.block_number) + "-".join(all.meta_data) + "-".join(all.log) + "-" + str(all.timestamp) \
-                          + "-" + all.previous_block_hash
+                        all_pool.previous_block_hash = last_hash_block.block_hash
+                        all_pool.block_number = last_hash_block.block_number + 1
+                        block_data = all_pool.case_id + "-" + str(all_pool.block_number) + "-" + all_pool.meta_data + \
+                                     "-" + all_pool.log + "-" + str(all_pool.timestamp) + "-" + all_pool.previous_block_hash
 
-                        all.block_hash = hashlib.sha256(block_data.encode()).hexdigest()
-                        all.sendout_time = None
-                        all.count = 0
+                        all_pool.block_hash = hashlib.sha256(block_data.encode()).hexdigest()
+                        all_pool.sendout_time = None
+                        all_pool.count = 0
 
                         session.commit()
 
@@ -264,9 +312,8 @@ def check_twothird():
                 # session.add(sql)
                 # session.commit()
 
-                # TODO I edited here...
                 # Load string as json
-                metadata_json = json.loads(verified_block.meta_data)
+                # metadata_json = json.loads(verified_block.meta_data)
                 log_json = json.loads(verified_block.log)
 
                 # Check log action add user
@@ -284,15 +331,6 @@ def check_twothird():
                         usercase = UserCase(user, verified_block.case_id)
                         session.add(usercase)
                     session.commit()
-                elif "RemoveUser" == log_json["Action"]:
-                    usercase = session.query(UserCase) \
-                        .filter(UserCase.username == log_json["Username"], UserCase.case_id == verified_block.case_id) \
-                        .first()
-                    session.delete(usercase)
-                else:
-                    pass
-            else:
-                return "Fail"
 
     Session.remove()
 
@@ -304,8 +342,8 @@ def verify(case_id):
         if previous_block_hash != block.previous_block_hash:
             return False
 
-        data = str(block.id) + "-" + str(block.block_number) + "-" + block.meta_data + "-" + block.log \
-               + "-" + str(block.timestamp) + "-" + block.previous_block_hash
+        data = block.id + "-" + str(block.block_number) + "-" + block.meta_data + "-" + block.log + "-" + \
+               str(block.timestamp) + "-" + block.previous_block_hash
         block_hash = hashlib.sha256(data.encode()).hexdigest()
         if block_hash != block.block_hash:
             return False
@@ -322,10 +360,12 @@ def send_unverified_block():
     list_of_users = randomselect()
     thread_pool = ThreadPoolExecutor(5)  # 5 Worker Threads
     for block in list_of_unverified:
-        data = {"Pool": [{"id": block.id, "case_id": block.case_id, "block_number": block.block_number, "meta_data": block.meta_data, "log": block.log,
-                          "timestamp": str(block.timestamp),
-                          "previous_block_hash": block.previous_block_hash, "block_hash": block.block_hash}]
-                }
+        data = {"Pool": [
+            {"id": block.id, "case_id": block.case_id, "block_number": block.block_number, "meta_data": block.meta_data,
+             "log": block.log,
+             "timestamp": str(block.timestamp),
+             "previous_block_hash": block.previous_block_hash, "block_hash": block.block_hash}]
+        }
         if block.sendout_time is None:
             block.sendout_time = datetime.now()
             block.count = 0
@@ -353,4 +393,3 @@ def send_unverified_block():
                     session.commit()
 
     Session.remove()
-

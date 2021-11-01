@@ -1,27 +1,45 @@
-import json
-
-from app import db, app
+"""
+Database model for SQLite database
+"""
 import hashlib
 from datetime import datetime
-from itsdangerous import (TimedJSONWebSignatureSerializer
-                          as Serializer, BadSignature, SignatureExpired)
-from passlib.apps import custom_app_context as pwd_context
+
+from app import db
 
 
 class Peers(db.Model):
+    """
+    Keeps database on who and how to communicate to other clients/nodes
+    """
     __tablename__ = "Peers"
     # __table_args__ = {'extend_existing': True}
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ip_address = db.Column(db.String(15), nullable=False, unique=True)
     port = db.Column(db.SmallInteger, nullable=True)
     server_type = db.Column(db.String(6), nullable=False)
 
     def __init__(self, ip_address, port, server_type):
+        """
+        Init function of Peers Class
+        :param ip_address: IP Address of the machine
+        :type ip_address: str
+        :param port: Port Number of the machine
+        :type port: int
+        :param server_type: "server" / "client" to identify the machine
+        :type server_type: str
+        """
         self.ip_address = ip_address
         self.port = port
         self.server_type = server_type
 
     def as_dict(self):
+        """Returns this object as dict
+
+        Converts all keypair into a dict for outputing/processed as json object
+
+        :return: Object as dict
+        :rtype: dict
+        """
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
@@ -37,7 +55,8 @@ class Block(db.Model):
     block_hash = db.Column(db.String(255))
     status = db.Column(db.Boolean)
 
-    def __init__(self, id, meta_data, log, block_number=None, previous_block_hash=None, timestamp=None, block_hash=None, status=None):
+    def __init__(self, id, meta_data, log, block_number=None, previous_block_hash=None, timestamp=None, block_hash=None,
+                 status=None):
         """
         this for the creation of a new block NOT for the blockchain
         :param id: case number
@@ -126,13 +145,13 @@ class Pool(db.Model):
         self.meta_data = meta_data
         self.log = log
         self.timestamp = datetime.now()
-        self.block_data = self.case_id + "-" + str(self.block_number) + "-" + self.meta_data + "-" + self.log + "-" + str(self.timestamp) \
+        self.block_data = self.case_id + "-" + str(
+            self.block_number) + "-" + self.meta_data + "-" + self.log + "-" + str(self.timestamp) \
                           + "-" + self.previous_block_hash
         self.block_hash = hashlib.sha256(self.block_data.encode()).hexdigest()
         self.status = False
         self.count = 0
         self.sendout_time = None
-        print("\n\nBLOCK_DATA: {}\n\n".format(self.block_data))
 
     def __repr__(self):
         return "case_id: {}\nblock_number: {}\nprevious_block_hash: {}\nmeta_data: {}\nlog: " \
@@ -178,52 +197,37 @@ class Consensus(db.Model):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-class User(db.Model):
-    __tablename__ = 'Users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(32), index=True)
-    password_hash = db.Column(db.String(128))
-    ip_address = db.Column(db.String(128), nullable=True)
-    token = db.Column(db.String(128), nullable=True)
-
-    def hash_password(self, password):
-        self.password_hash = pwd_context.encrypt(password)
-
-    def verify_password(self, password):
-        return pwd_context.verify(password, self.password_hash)
-
-    def generate_auth_token(self):
-        s = Serializer(app.config['SECRET_KEY'])
-        token = s.dumps({'id': self.id})
-        self.token = token.decode('ascii')
-        return s.dumps({'id': self.id})
-
-    @staticmethod
-    def verify_auth_token(token):
-        s = Serializer(app.config['SECRET_KEY'])
-        try:
-            data = s.loads(token)
-        except SignatureExpired:
-            return None  # valid token, but expired
-        except BadSignature:
-            return None  # invalid token
-        user = User.query.get(data['id'])
-        return user
-
-
 class UserCase(db.Model):
+    """
+    Keeps track on the User's assigned cases in the blockchain
+    """
     __tablename__ = "UserCase"
     __table_args__ = {'extend_existing': True}
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(255), nullable=False)
     case_id = db.Column(db.String(255), nullable=False)
 
     def __init__(self, username, case_id):
+        """
+        Init function of UserCase Class
+
+        :param username: Username of the User
+        :type username: str
+        :param case_id: Case ID of the case
+        :type case_id: str
+        """
         self.username = username
         self.case_id = case_id
 
     def as_dict(self):
+        """Returns this object as dict
+
+        Converts all keypair into a dict for outputing/processed as json object
+
+        :return: Object as dict
+        :rtype: dict
+        """
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
@@ -236,18 +240,3 @@ class MetaDataFile(db.Model):
     def __init__(self, case_id, meta_data):
         self.case_id = case_id
         self.meta_data = meta_data
-
-class User_stored_info(db.Model):
-    __tablename__ = "user_stored_info"
-    __table_args__ = {'extend_existing': True}
-
-    user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    case_id = db.Column(db.String(15), nullable=False)
-    last_verified_hash = db.Column(db.String(255))
-
-    def __init__(self, case_id, last_verified_hash):
-        self.case_id = case_id
-        self.last_verified_hash = last_verified_hash
-
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

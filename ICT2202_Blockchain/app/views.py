@@ -1,15 +1,15 @@
+"""
+The webpage routing of flask server
+"""
 import datetime
-import math
 import sys
-import json
 
-from flask import request, jsonify, url_for, g
-from flask_restful import abort
-from flask_httpauth import HTTPTokenAuth
+from flask import request, jsonify
+
 from app import app, db, auth
 from app.controller import convert_to_pool, convert_to_consensus, verify, send_new_verified_to_clients
 # Import module models
-from app.models import Peers, Block, Pool, Consensus, User, UserCase, MetaDataFile
+from app.models import Block, Pool, Consensus, UserCase
 
 STATUS_OK = 200
 STATUS_NOT_FOUND = 404
@@ -23,6 +23,14 @@ tokens = {
 
 @app.route("/health")
 def current_health():
+    """
+    Return health of current server
+
+    :return: Python version, Platform and Health
+    :rtype:
+        - dict
+        - Status 200
+    """
     resp = {"Python_version": sys.version,
             "Platform": sys.platform,
             "Health": "Good"}
@@ -42,7 +50,6 @@ def receive_block():
         # Convert into class object
         block = convert_to_pool(json_block)
         if block is None:
-            
             ("Error processing: {}".format(json_block))
             num_of_errors += 1
             continue
@@ -51,10 +58,12 @@ def receive_block():
         exist = Block.query.filter_by(id=block.case_id).first()
         if exist is None:
             # Add to Block
-            new_block = Block(block.case_id, block.meta_data, block.log, block_number=block.block_number, previous_block_hash=block.previous_block_hash, timestamp=block.timestamp, block_hash=block.block_hash, status=1)
+            new_block = Block(block.case_id, block.meta_data, block.log, block_number=block.block_number,
+                              previous_block_hash=block.previous_block_hash, timestamp=block.timestamp,
+                              block_hash=block.block_hash, status=1)
             db.session.add(new_block)
             db.session.commit()
-            
+
             # Sending new verified blocks to clients
             send_new_verified_to_clients(new_block)
         else:
@@ -85,7 +94,7 @@ def receive_response():
         try:
             if (response_timestamp + datetime.timedelta(seconds=TIMEOUT)) >= datetime.datetime.now():
                 # Add to consensus Table TODO Add checks
-                consent = Consensus.query.filter_by(ip_address=consensus.ip_address,pool_id=consensus.pool_id).first()
+                consent = Consensus.query.filter_by(ip_address=consensus.ip_address, pool_id=consensus.pool_id).first()
                 if consent is None:
                     db.session.add(consensus)
                     db.session.commit()
@@ -186,6 +195,7 @@ def get_peers():
         # No Cases Found
         return "", STATUS_OK
 
+
 @auth.verify_token
 def verify_token(token):
     if token in tokens:
@@ -210,7 +220,6 @@ curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secr
     """
     username = request.json.get('username')
     if username is None:
-        abort(400)
         return "failed, username is None"
     query = UserCase.query.filter_by(username=username).first()
     if query:
@@ -231,4 +240,3 @@ def caseinfo():
         return jsonify(Blocks=sql)
     else:
         return "fail, cannot find case_id"
-
