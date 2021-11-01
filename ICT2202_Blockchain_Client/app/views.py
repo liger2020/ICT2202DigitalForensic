@@ -98,15 +98,14 @@ def receive():
 
 @auth.verify_token
 def verify_token(token):
+    """
+    compare token with the authorized token in the dictionary tokens and return the username of the token if found
+    :param token: a token for authentication
+
+    return the username that belong to the token
+    :rtype:
+        - Success - str, username
+    """
     if token in tokens:
         return tokens[token]
 
-
-@app.route('/api/test')
-@auth.login_required
-def index():
-    """
-    testing remove before final product
-    curl http://192.168.75.133:5000/api/test -H "Authorization: Bearer secret-token-1"
-    """
-    return "Hello, {}!".format(auth.current_user())
