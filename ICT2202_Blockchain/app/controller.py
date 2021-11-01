@@ -170,6 +170,9 @@ These delegates will then verify the hash of the block and return a yes/no respo
 
 
 def randomselect():
+    """
+    This function will select 51 percent of the user in the system for verification of the block
+    """
     peer_list = Peers.query.all()
     numberofpeer = len(peer_list)
     fiftyone = math.ceil(numberofpeer * 0.51)
@@ -347,6 +350,9 @@ def check_twothird():
 
 
 def verify(case_id):
+    """
+    A function used to verify if the case id exist in the system. 
+    """
     blocks = Block.query.filter_by(id=case_id).order_by(Block.block_number.asc()).all()
     previous_block_hash = ""
     for block in blocks:
@@ -364,6 +370,10 @@ def verify(case_id):
 
 # !!! Native SQLAlchemy Syntax !!!
 def send_unverified_block():
+    """
+    A scheduled function that sends unverified blocks in the pool to the selected delegates for them to vote if the block should be added to the 
+    block. 
+    """
     session = Session()
 
     # Every 10 Second
