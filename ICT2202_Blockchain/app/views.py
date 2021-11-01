@@ -217,32 +217,36 @@ def get_peers():
 
 @auth.verify_token
 def verify_token(token):
+    """
+    compare token with the authorized token in the dictionary tokens and return the username of the token if found
+    :param token: a token for authentication
+
+    return the username that belong to the token
+    """
     if token in tokens:
         return tokens[token]
-
-
-@app.route('/api/test')
-@auth.login_required
-def index():
-    """
-    testing remove before final product
-    curl http://192.168.75.133:5000/api/test -H "Authorization: Bearer secret-token-1"
-    """
-    return "Hello, {}!".format(auth.current_user())
 
 
 @app.route('/userAssignedCase', methods=['POST'])
 @auth.login_required
 def assignedCase():
     """
-curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://192.168.75.133:5000/userAssignedCase -d {\"username\":\"test2\"}
+    Return a dictionary of case assigned to user filter by username
+
+    :return: List of caseid
+    :rtype:
+        - Success - dictionary, 200
+        - Failure - str, fail
+
+    For testing: curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://{your ip}:5000/userAssignedCase -d {\"username\":\"test2\"}
     """
     username = request.json.get('username')
     if username is None:
         return "failed, username is None"
-    query = UserCase.query.filter_by(username=username).first()
+    query = UserCase.query.filter_by(username=username).all()
+    query = [x.as_dict() for x in query]
     if query:
-        return query.case_id
+        return jsonify(query)
     return "fail"
 
 
@@ -250,7 +254,14 @@ curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secr
 @auth.login_required
 def caseinfo():
     """
-    curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://192.168.75.133:5000/caseinfo -d {\"case_id\":\"1\"}
+    Return dictionary fill with rows of block info from Block database filter by case_id
+
+    :return: dictionary of rows of block
+    :rtype:
+        - Success - dictionary, 200
+        - Failure - str, "fail, cannot find case_id"
+
+    For testing: curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://{your ip }:5000/caseinfo -d {\"case_id\":\"1\"}
     """
     case_id = request.json.get('case_id')
     sql = Block.query.filter_by(id=case_id).all()

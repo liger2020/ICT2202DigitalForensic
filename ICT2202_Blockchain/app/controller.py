@@ -19,6 +19,7 @@ TIMEOUT = 30
 
 
 def convert_to_block(json_block):
+
     try:
         timestamp = json_block.get("timestamp")
         if timestamp is not None:
