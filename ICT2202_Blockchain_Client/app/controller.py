@@ -118,6 +118,14 @@ def convert_to_user_stored_info(json_block):
 
 
 def convert_to_pool(json_block):
+    """
+    Return given data into Pool format
+
+    :param json_block: the data given by server, must contain id, case_id, meta_data, log, timestamp, previous_block_hash and block_hash 
+    :type json_block: json
+    :return: Pool object
+    :rtype: None if failed
+    """
     try:
         pool = Pool(json_block["id"], json_block["case_id"], json_block["meta_data"], json_block["log"],
                     parser.parse(json_block["timestamp"]),
@@ -235,6 +243,11 @@ def request_for_update(peer, case_id, original_block):
 def verify(unverified_block):
     """
     User will perform verification using the information sent by the server and respond with a boolean statement. 
+
+    :param unverified_block: The unverified block is sent by the server for the selected delegates to verify the block. 
+    :type unverified_block: json
+    :return: return a true/false value whether the block is verified 
+    :rtype: boolean 
     """
     # unverified block is in json format
     caseid = unverified_block.get('case_id')

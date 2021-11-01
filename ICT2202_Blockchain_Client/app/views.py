@@ -76,6 +76,12 @@ def get_latest_verified():
 @app.route('/receivepool', methods=['POST'])
 @auth.login_required
 def receive():
+    """
+    Receive block sent by the server 
+
+    :return: return the address of the server
+    :rtype: ip address
+    """
     thread_pool = ThreadPoolExecutor(5)  # 5 Worker Threads
 
     # Process JSON to Pool Model Object
@@ -84,14 +90,11 @@ def receive():
         if pool is None:
             return {"Format": "Wrong"}
         else:
-            print("This is the pool:", str(pool))
             verified = verify(pool)
             resp = {"pool_id": pool.get('id'), "response": verified}  # Placeholder
-            print(resp)
             # Send Response Back to Server
             peer = Peers(request.remote_addr, 5000, None)
             thread_pool.submit(send_block, peer, resp, "receive_response")  # send block to user
-            print("after submit")
 
         return request.remote_addr, STATUS_OK
 

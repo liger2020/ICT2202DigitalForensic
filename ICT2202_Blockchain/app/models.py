@@ -152,7 +152,6 @@ class Pool(db.Model):
 
     def __init__(self, case_id, meta_data, log):
         """
-        this for the creation of a new block NOT for the blockchain
         :param id: case number
         :param meta_data: this refers to whatever information we want to put in. can give json format or just str.
         :param log: this refers to the action of user

@@ -38,6 +38,9 @@ class Peers(db.Model):
 
 
 class Pool(db.Model):
+    """
+    Temporarily stores the data sent by the server for verification 
+    """
     __tablename__ = "Pool"
     __table_args__ = {'extend_existing': True}
 
@@ -50,6 +53,15 @@ class Pool(db.Model):
     block_hash = db.Column(db.String(255))
 
     def __init__(self, id, case_id, meta_data, log, timestamp, previous_block_hash, block_hash):
+        """
+        :param id: id
+        :param case_id: this refers to the case id of the block
+        :param meta_data: this refers to whatever information we want to put in. can give json format or just str.
+        :param log: this refers to the action of user
+        :param timestamp: this refers to the timestamp
+        :param previous_block_hash: this refers last verified hash of the blockchain
+        :param block_hash: this refers to the unverified hash waiting to be verified by the user 
+        """
         self.id = id
         self.case_id = case_id
         self.meta_data = meta_data
@@ -59,6 +71,13 @@ class Pool(db.Model):
         self.block_hash = block_hash
 
     def as_dict(self):
+        """Returns this object as dict
+
+        Converts all keypair into a dict for outputing/processed as json object
+
+        :return: Object as dict
+        :rtype: dict
+        """
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
