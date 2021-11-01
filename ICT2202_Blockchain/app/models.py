@@ -133,6 +133,9 @@ class Block(db.Model):
 
 
 class Pool(db.Model):
+    """
+    A temporary table that stores unverified blocks from all cases until they are verified. 
+    """
     __tablename__ = "Pool"
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -151,9 +154,8 @@ class Pool(db.Model):
         """
         this for the creation of a new block NOT for the blockchain
         :param id: case number
-        :param block_number: position in the blockchain
-        :param previous_block_hash: this refers to the hash of the previous block within the chain;
         :param meta_data: this refers to whatever information we want to put in. can give json format or just str.
+        :param log: this refers to the action of user
         """
 
         self.case_id = case_id
@@ -182,6 +184,12 @@ class Pool(db.Model):
                                                                               self.count)
 
     def set_block_number(self):
+        """
+        return block_number given id, if id is does not exist block_number is 0 else it is the next increment
+
+        :return: block_number
+        :rtype: str
+        """
         result = Block.query.filter_by(id=self.case_id).order_by(Block.block_number.desc()).first()
         if result is None:
             self.block_number = 0
@@ -191,10 +199,21 @@ class Pool(db.Model):
             self.previous_block_hash = result.block_hash
 
     def as_dict(self):
+        """
+        Returns this object as dict
+
+        Converts all rows into a dict for outputing/processed as json object
+
+        :return: Object as dict
+        :rtype: dict
+        """
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 class Consensus(db.Model):
+    """
+    A temporary table that stores the consensus sent by selected clients to verify the blocks. 
+    """
     __tablename__ = "Consensus"
     __table_args__ = {'extend_existing': True}
 
@@ -205,12 +224,27 @@ class Consensus(db.Model):
     receive_timestamp = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, ip_address, pool_id, response):
+        """
+        this for receiving response given by users 
+
+        :param ip_address: ip address of the client 
+        :param response: response received from users
+        :param receive_timestamp: get the current timestamp 
+        """
         self.ip_address = ip_address
         self.pool_id = pool_id
         self.response = response
         self.receive_timestamp = datetime.now()
 
     def as_dict(self):
+        """
+        Returns this object as dict
+
+        Converts all rows into a dict for outputing/processed as json object
+
+        :return: Object as dict
+        :rtype: dict
+        """
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
