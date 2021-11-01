@@ -8,7 +8,6 @@ from flask import request, jsonify
 
 from app import app, db, auth
 from app.controller import convert_to_pool, convert_to_consensus, verify, send_new_verified_to_clients
-# Import module models
 from app.models import Block, Pool, Consensus, UserCase
 
 STATUS_OK = 200
@@ -87,11 +86,18 @@ def receive_block():
 def receive_response():
     # Placeholder Expected Input: {"pool_id": "2", "response": "yes"}
     # Process Json to Consensus Model Object\
+    """
+    This function will receive the response sent by the delegates (client) 
+
+    :return: Give a response whether the code runs smoothly 
+    :rtype:
+        - "Error Occurred" - str 
+        - "Responding from" - Dict 
+    """
     resp = request.get_json()
     consensus = convert_to_consensus(resp, request.remote_addr)
     if consensus is None:
-        # TODO return error code
-        return {"error": "very true"}
+        return "Error Occurred!"
 
     # Check Timeout
     pool = Pool.query.filter_by(id=consensus.pool_id).first()
@@ -112,8 +118,6 @@ def receive_response():
                 pass
         except:
             pass
-    else:
-        print("HIt 2")
     return {"Responding From": "/receive_response"}, STATUS_OK
 
 
