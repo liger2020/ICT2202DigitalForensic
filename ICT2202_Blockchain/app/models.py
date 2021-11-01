@@ -107,13 +107,21 @@ class Block(db.Model):
 
     def as_dict(self):
         """
-        return Block object as dictionary
+        Returns this object as dict
+
+        Converts all rows into a dict for outputing/processed as json object
+
+        :return: Object as dict
+        :rtype: dict
         """
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     def set_block_number(self):
         """
         return block_number given id, if id is does not exist block_number is 0 else it is the next increment
+
+        :return: block_number
+        :rtype: str
         """
         result = Block.query.filter_by(id=self.id).order_by(Block.block_number.desc()).first()
         if result is None:
