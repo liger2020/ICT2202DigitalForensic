@@ -104,10 +104,11 @@ def receive():
 @auth.verify_token
 def verify_token(token):
     """
-    compare token with the authorized token in the dictionary tokens and return the username of the token if found
-    :param token: a token for authentication
+    Compare token with the authorized token in the dictionary tokens and return the username of the token if found
 
-    return the username that belong to the token
+    :param token: A token for authentication
+    :type token: str
+    :return: The username that belong to the token
     :rtype:
         - Success - str, username
     """
