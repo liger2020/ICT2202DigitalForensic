@@ -78,15 +78,6 @@ def receive():
         return request.remote_addr, STATUS_OK
 
 
-@app.route('/send_block')
-def send():
-    test = Pool(1, meta_data="test", log="test")
-    db.session.add(test)
-    db.session.commit()
-
-    return jsonify(output=test), STATUS_OK
-
-
 @auth.verify_token
 def verify_token(token):
     if token in tokens:

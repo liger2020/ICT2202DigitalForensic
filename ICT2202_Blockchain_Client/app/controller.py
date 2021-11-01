@@ -44,7 +44,6 @@ def get_live_peers():
 def send_block(peer, data, url):
     url = "http://{}:{}/{}".format(peer.ip_address, peer.port, url)
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain', "Authorization": "Bearer secret-token-1"}
-    print(data)
     if data == "":
         r = requests.get(url, headers=headers, timeout=3)
         return r
@@ -170,6 +169,9 @@ def request_for_update(peer, case_id, original_block):
 
 
 def verify(unverified_block):
+    """
+    User will perform verification using the information sent by the server and respond with a boolean statement. 
+    """
     # unverified block is in json format
     caseid = unverified_block.get('case_id')
     block_num = unverified_block.get('block_number')
@@ -180,19 +182,12 @@ def verify(unverified_block):
     block_hash = unverified_block.get('block_hash')
     user_block_info = UserStoredInfo.query.filter_by(case_id=caseid).first()
     if user_block_info.last_verified_hash == prev_hash:
-        print("HIT 1")
         verifying = caseid + "-" + str(block_num) + "-" + metadata + "-" + log + "-" + str(timestamp) \
                           + "-" + user_block_info.last_verified_hash
         verify_block_hash = hashlib.sha256(verifying.encode()).hexdigest()
-        print("TIMESTAMP:", caseid + "-" + str(block_num) + "-" + metadata + "-" + log + "-" + str(timestamp) \
-                          + "-" + user_block_info.last_verified_hash)
-        print("\nCOMPARE: \n{}\n{}\n".format(verify_block_hash, block_hash))
         if verify_block_hash == block_hash:
-            print("HIT 2")
             return 1
         else:
-            print("HIT 3")
             return 0
     else:
-        print("HIT 4")
         return 0
