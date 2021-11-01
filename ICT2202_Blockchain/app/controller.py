@@ -321,13 +321,7 @@ def check_twothird():
                 # Sending new verified blocks to clients
                 send_new_verified_to_clients(add_the_block)
 
-                # commiting to Meta_Data_File table
-                # sql = Meta_Data_File(case_id=verified_block.case_id, meta_data=verified_block.meta_data.File_Name)
-                # session.add(sql)
-                # session.commit()
-
                 # Load string as json
-                # metadata_json = json.loads(verified_block.meta_data)
                 log_json = json.loads(verified_block.log)
 
                 # Check log action add user
