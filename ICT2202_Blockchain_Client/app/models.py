@@ -1,3 +1,8 @@
+"""
+models.py
+=========
+Database model for SQLite database
+"""
 from app import db
 
 

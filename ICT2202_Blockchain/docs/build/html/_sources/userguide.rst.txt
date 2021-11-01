@@ -1,0 +1,22 @@
+.. ICT2202 Blockchain documentation master file, created by
+   sphinx-quickstart on Mon Nov  1 14:51:02 2021.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to ICT2202 Blockchain-based Chain of Custody’s documentation!
+==============================================
+
+A secure blockchain-based chain of custody framework alongside a case management system in which a private lightweight blockchain in a case management system that allows authenticated participants to access off-chain evidence stored on a credible storage medium.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+
+Indices and tables
+==================
+
+* :ref:`userguide`
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
