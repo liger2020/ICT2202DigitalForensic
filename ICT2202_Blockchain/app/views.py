@@ -41,6 +41,12 @@ def current_health():
 @app.route('/receiveblock', methods=['POST'])
 @auth.login_required
 def receive_block():
+    """
+    Server to receive blocks from server
+
+    :return: Show input receives by server
+    :rtype: json, Status 200
+    """
     num_of_errors = 0
 
     # Check block need verify
