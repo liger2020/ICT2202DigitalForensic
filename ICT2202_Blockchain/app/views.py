@@ -231,6 +231,7 @@ def get_peers():
 def verify_token(token):
     """
     Compare token with the authorized token in the dictionary tokens and return the username of the token if found
+
     :param token: A token for authentication
     :type token: str
     :return: The username that belong to the token
