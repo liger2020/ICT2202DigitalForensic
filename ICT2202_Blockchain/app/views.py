@@ -222,6 +222,8 @@ def verify_token(token):
     :param token: a token for authentication
 
     return the username that belong to the token
+    :rtype:
+        - Success - str, username
     """
     if token in tokens:
         return tokens[token]
