@@ -1,0 +1,521 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Welcome to ICT2202 Blockchain Client’s documentation! &#8212; ICT2202 Blockchain Client 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="static/documentation_options.js"></script>
+    <script src="static/jquery.js"></script>
+    <script src="static/underscore.js"></script>
+    <script src="static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="welcome-to-ict2202-blockchain-client-s-documentation">
+<h1>Welcome to ICT2202 Blockchain Client’s documentation!<a class="headerlink" href="#welcome-to-ict2202-blockchain-client-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<span class="target" id="module-app.views"></span><section id="views-py">
+<h2>views.py<a class="headerlink" href="#views-py" title="Permalink to this headline">¶</a></h2>
+<p>The webpage routing of flask server</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="app.views.current_health">
+<span class="sig-prename descclassname"><span class="pre">app.views.</span></span><span class="sig-name descname"><span class="pre">current_health</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.views.current_health" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return health of current server</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Python version, Platform and Health</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>dict</p></li>
+<li><p>Status 200</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.views.get_latest_verified">
+<span class="sig-prename descclassname"><span class="pre">app.views.</span></span><span class="sig-name descname"><span class="pre">get_latest_verified</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.views.get_latest_verified" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receives latest block through sync</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Whether sync succeeded</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Success - Status 200</p></li>
+<li><p>Failure - Status 404</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.views.receive">
+<span class="sig-prename descclassname"><span class="pre">app.views.</span></span><span class="sig-name descname"><span class="pre">receive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.views.receive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive block sent by the server</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>return the address of the server</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ip address</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.views.verify_token">
+<span class="sig-prename descclassname"><span class="pre">app.views.</span></span><span class="sig-name descname"><span class="pre">verify_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.views.verify_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare token with the authorized token in the dictionary tokens and return the username of the token if found</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>token</strong> (<em>str</em>) – A token for authentication</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The username that belong to the token</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>Success - str, username</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<span class="target" id="module-app.controller"></span><section id="controller-py">
+<h2>controller.py<a class="headerlink" href="#controller-py" title="Permalink to this headline">¶</a></h2>
+<p>Functions to be called</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="app.controller.check_health">
+<span class="sig-prename descclassname"><span class="pre">app.controller.</span></span><span class="sig-name descname"><span class="pre">check_health</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">peer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.controller.check_health" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return response of target</p>
+<p>Check if the target machine is online by requesting from “/health” on the machine</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>peer</strong> (<a class="reference internal" href="#app.models.Peers" title="app.models.Peers"><em>Peers</em></a>) – Peer object of the target</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Online - Target Peer</p></li>
+<li><p>Offline - None</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#app.models.Peers" title="app.models.Peers">Peers</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.controller.convert_to_pool">
+<span class="sig-prename descclassname"><span class="pre">app.controller.</span></span><span class="sig-name descname"><span class="pre">convert_to_pool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_block</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.controller.convert_to_pool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return given data into Pool format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>json_block</strong> (<em>json</em>) – the data given by server, must contain id, case_id, meta_data, log, timestamp, previous_block_hash and block_hash</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Pool object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None if failed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.controller.convert_to_user_stored_info">
+<span class="sig-prename descclassname"><span class="pre">app.controller.</span></span><span class="sig-name descname"><span class="pre">convert_to_user_stored_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_block</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.controller.convert_to_user_stored_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check is json is formatted correctly for User Stored Info Model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>json_block</strong> (<em>str</em>) – Json String</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>UserStoredInfo model</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#app.models.UserStoredInfo" title="app.models.UserStoredInfo">UserStoredInfo</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.controller.get_live_peers">
+<span class="sig-prename descclassname"><span class="pre">app.controller.</span></span><span class="sig-name descname"><span class="pre">get_live_peers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.controller.get_live_peers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of online</p>
+<p>Returns a list of all peers that is online from the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>servertype</strong> (<em>str</em>) – “server”/”client” to check</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of All Peers that is online</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.controller.request_for_update">
+<span class="sig-prename descclassname"><span class="pre">app.controller.</span></span><span class="sig-name descname"><span class="pre">request_for_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">peer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_block</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.controller.request_for_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request for new blocks from nodes and do some basic check if data receive is correct</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>peer</strong> (<a class="reference internal" href="#app.models.Peers" title="app.models.Peers"><em>Peers</em></a>) – Target machines to sent to</p></li>
+<li><p><strong>case_id</strong> (<em>str</em>) – CaseID of the case</p></li>
+<li><p><strong>original_block</strong> (<a class="reference internal" href="#app.models.UserStoredInfo" title="app.models.UserStoredInfo"><em>UserStoredInfo</em></a>) – UserStoredInfo model with last hash, length and hash</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.controller.send_block">
+<span class="sig-prename descclassname"><span class="pre">app.controller.</span></span><span class="sig-name descname"><span class="pre">send_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">peer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.controller.send_block" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function to send data to target</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>peer</strong> (<a class="reference internal" href="#app.models.Peers" title="app.models.Peers"><em>Peers</em></a>) – Machine to sent to</p></li>
+<li><p><strong>data</strong> (<em>dict</em>) – Json data to be sent</p></li>
+<li><p><strong>url</strong> (<em>str</em>) – The target link to be sent to</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The response of the request sent</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>“get” - Response</p></li>
+<li><p>”post” - dict</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.controller.send_sync">
+<span class="sig-prename descclassname"><span class="pre">app.controller.</span></span><span class="sig-name descname"><span class="pre">send_sync</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">peer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.controller.send_sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sending query to nodes to determine if current database is outdated. If outdated request from them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>peer</strong> (<a class="reference internal" href="#app.models.Peers" title="app.models.Peers"><em>Peers</em></a>) – Target machine ip and port</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.controller.sync_schedule">
+<span class="sig-prename descclassname"><span class="pre">app.controller.</span></span><span class="sig-name descname"><span class="pre">sync_schedule</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.controller.sync_schedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syncing scheduled to run frequently to ensure the database is updated with nodes</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="app.controller.verify">
+<span class="sig-prename descclassname"><span class="pre">app.controller.</span></span><span class="sig-name descname"><span class="pre">verify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unverified_block</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.controller.verify" title="Permalink to this definition">¶</a></dt>
+<dd><p>User will perform verification using the information sent by the server and respond with a boolean statement.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unverified_block</strong> (<em>json</em>) – The unverified block is sent by the server for the selected delegates to verify the block.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>return a true/false value whether the block is verified</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<span class="target" id="module-app.models"></span><section id="models-py">
+<h2>models.py<a class="headerlink" href="#models-py" title="Permalink to this headline">¶</a></h2>
+<p>Database model for SQLite database</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="app.models.Peers">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">app.models.</span></span><span class="sig-name descname"><span class="pre">Peers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ip_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.models.Peers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Keeps database on who and how to communicate to other clients/nodes</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="app.models.Peers.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ip_address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.models.Peers.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Init function of Peers Class
+:param ip_address: IP Address of the machine
+:type ip_address: str
+:param port: Port Number of the machine
+:type port: int
+:param server_type: “server” / “client” to identify the machine
+:type server_type: str</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.models.Peers.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.models.Peers.as_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns this object as dict</p>
+<p>Converts all keypair into a dict for outputing/processed as json object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Object as dict</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.Peers.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#app.models.Peers.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.Peers.ip_address">
+<span class="sig-name descname"><span class="pre">ip_address</span></span><a class="headerlink" href="#app.models.Peers.ip_address" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.Peers.port">
+<span class="sig-name descname"><span class="pre">port</span></span><a class="headerlink" href="#app.models.Peers.port" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.Peers.server_type">
+<span class="sig-name descname"><span class="pre">server_type</span></span><a class="headerlink" href="#app.models.Peers.server_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="app.models.Pool">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">app.models.</span></span><span class="sig-name descname"><span class="pre">Pool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">previous_block_hash</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_hash</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.models.Pool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temporarily stores the data sent by the server for verification</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="app.models.Pool.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">previous_block_hash</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_hash</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.models.Pool.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> – id</p></li>
+<li><p><strong>case_id</strong> – this refers to the case id of the block</p></li>
+<li><p><strong>meta_data</strong> – this refers to whatever information we want to put in. can give json format or just str.</p></li>
+<li><p><strong>log</strong> – this refers to the action of user</p></li>
+<li><p><strong>timestamp</strong> – this refers to the timestamp</p></li>
+<li><p><strong>previous_block_hash</strong> – this refers last verified hash of the blockchain</p></li>
+<li><p><strong>block_hash</strong> – this refers to the unverified hash waiting to be verified by the user</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.models.Pool.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.models.Pool.as_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns this object as dict</p>
+<p>Converts all keypair into a dict for outputing/processed as json object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Object as dict</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.Pool.block_hash">
+<span class="sig-name descname"><span class="pre">block_hash</span></span><a class="headerlink" href="#app.models.Pool.block_hash" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.Pool.case_id">
+<span class="sig-name descname"><span class="pre">case_id</span></span><a class="headerlink" href="#app.models.Pool.case_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.Pool.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#app.models.Pool.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.Pool.log">
+<span class="sig-name descname"><span class="pre">log</span></span><a class="headerlink" href="#app.models.Pool.log" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.Pool.meta_data">
+<span class="sig-name descname"><span class="pre">meta_data</span></span><a class="headerlink" href="#app.models.Pool.meta_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.Pool.previous_block_hash">
+<span class="sig-name descname"><span class="pre">previous_block_hash</span></span><a class="headerlink" href="#app.models.Pool.previous_block_hash" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.Pool.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><a class="headerlink" href="#app.models.Pool.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="app.models.UserStoredInfo">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">app.models.</span></span><span class="sig-name descname"><span class="pre">UserStoredInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_verified_hash</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.models.UserStoredInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Keeps database on the last hash of all cases</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="app.models.UserStoredInfo.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_verified_hash</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#app.models.UserStoredInfo.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Init function of UserStoredInfo class
+:param case_id: Case ID of the case
+:type case_id: str
+:param last_verified_hash: Last verified hash of cases
+:type last_verified_hash: str
+:param length: Length of the Case Blockchain
+:type length: int</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="app.models.UserStoredInfo.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.models.UserStoredInfo.as_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns this object as dict</p>
+<p>Converts all keypair into a dict for outputing/processed as json object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Object as dict</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.UserStoredInfo.case_id">
+<span class="sig-name descname"><span class="pre">case_id</span></span><a class="headerlink" href="#app.models.UserStoredInfo.case_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.UserStoredInfo.last_verified_hash">
+<span class="sig-name descname"><span class="pre">last_verified_hash</span></span><a class="headerlink" href="#app.models.UserStoredInfo.last_verified_hash" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.UserStoredInfo.length">
+<span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#app.models.UserStoredInfo.length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="app.models.UserStoredInfo.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#app.models.UserStoredInfo.user_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">ICT2202 Blockchain Client</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Jarren, Raymous, Wei Xuan, Kian Yong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
