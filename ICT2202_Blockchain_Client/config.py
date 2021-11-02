@@ -27,17 +27,3 @@ CSRF_SESSION_KEY = "secret"
 
 # Secret key for signing cookies
 SECRET_KEY = "secret"
-
-
-def verify():  
-    '''
-        Receive info from nodes (info: case id, unverified log, unverified metadata, unverified time stamp, last verified block hash, unverified hash)
-        User side stores case id and last verified hash.
-        User will then verify if their case id and the node case id is the same
-        if same:
-            recalculate the hash 
-            if match:
-                send yes
-            else:
-                send no 
-    '''
