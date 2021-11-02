@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_httpauth import HTTPTokenAuth
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy, event
 from flask_apscheduler import APScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
