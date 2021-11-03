@@ -57,7 +57,7 @@ class Block(db.Model):
     previous_block_hash = db.Column(db.String(255))
     meta_data = db.Column(db.String(255), nullable=True)
     log = db.Column(db.String(255), nullable=True)
-    timestamp = db.Column(db.DateTime, nullable=True)
+    timestamp = db.Column(db.String(255), nullable=True)
     block_hash = db.Column(db.String(255))
     status = db.Column(db.Boolean)
 
