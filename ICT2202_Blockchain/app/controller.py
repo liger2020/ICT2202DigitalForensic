@@ -62,7 +62,9 @@ def convert_to_pool(json_block):
             block.meta_data = json_block["meta_data"]
             block.log = json_block["log"]
             if isinstance(json_block["timestamp"], str):
-                block.timestamp = parser.parse(json_block["timestamp"])
+                df = json_block["timestamp"]
+                df.strftime('%Y/%m/%d %H:%M:%S.%f')
+                block.timestamp = df
             else:
                 block.timestamp = json_block["timestamp"]
             block.block_hash = json_block["block_hash"]
