@@ -4,6 +4,7 @@ models.py
 Database model for SQLite database
 """
 import hashlib
+from dateutil import parser
 from datetime import datetime
 
 from app import db
@@ -164,7 +165,7 @@ class Pool(db.Model):
 
         self.meta_data = meta_data
         self.log = log
-        self.timestamp = datetime.now()
+        self.timestamp = parser.parse(str(datetime.now()))
         self.block_data = self.case_id + "-" + str(
             self.block_number) + "-" + self.meta_data + "-" + self.log + "-" + str(self.timestamp) \
                           + "-" + self.previous_block_hash
