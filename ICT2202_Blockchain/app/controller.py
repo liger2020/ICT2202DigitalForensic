@@ -245,6 +245,24 @@ def sync_schedule():
                     block = convert_to_block(block_json)
                     db.session.add(block)
 
+                    # Load string as json
+                    log_json = json.loads(block.log)
+
+                    # Check log action add user
+                    if "AddUser" == log_json["Action"]:
+                        user_list = log_json["Username"]
+                        for user in user_list:
+                            # Check exist
+                            test = UserCase.query \
+                                .filter(username=user, case_id=block.case_id) \
+                                .first()
+                            if test is not None:
+                                continue
+
+                            # Add User to case
+                            usercase = UserCase(user, block.case_id)
+                            db.session.add(usercase)
+
                 # If verified add to block, else discard
                 if verify(case_id):
                     db.session.commit()
