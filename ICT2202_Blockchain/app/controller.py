@@ -34,8 +34,7 @@ def convert_to_block(json_block):
         timestamp = json_block.get("timestamp")
         if timestamp is not None:
             df = json_block["timestamp"]
-            df.strftime('%Y/%m/%d %H:%M:%S.%f')
-            timestamp = df
+            timestamp = datetime.strptime(df, '%Y/%m/%d %H:%M:%S.%f')
 
         block = Block(json_block["id"], json_block["meta_data"], json_block["log"],
                       block_number=json_block.get("block_number"),
