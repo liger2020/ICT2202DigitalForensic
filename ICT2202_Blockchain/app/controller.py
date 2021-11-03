@@ -33,8 +33,7 @@ def convert_to_block(json_block):
     try:
         timestamp = json_block.get("timestamp")
         if timestamp is not None:
-            df = json_block["timestamp"]
-            timestamp = datetime.strptime(df, '%Y/%m/%d %H:%M:%S.%f')
+            timestamp = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S.%f')
 
         block = Block(json_block["id"], json_block["meta_data"], json_block["log"],
                       block_number=json_block.get("block_number"),
@@ -63,9 +62,7 @@ def convert_to_pool(json_block):
             block.meta_data = json_block["meta_data"]
             block.log = json_block["log"]
             if isinstance(json_block["timestamp"], str):
-                df = json_block["timestamp"]
-                df.strftime('%Y/%m/%d %H:%M:%S.%f')
-                block.timestamp = df
+                block.timestamp = datetime.strptime(json_block["timestamp"], '%Y-%m-%d %H:%M:%S.%f')
             else:
                 block.timestamp = json_block["timestamp"]
             block.block_hash = json_block["block_hash"]

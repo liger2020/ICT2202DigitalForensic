@@ -83,7 +83,7 @@ class Block(db.Model):
 
         if timestamp is None:
             self.timestamp = datetime.now()
-            self.timestamp.strftime('%Y/%m/%d %H:%M:%S.%f')
+            self.timestamp = self.timestamp.strftime('%Y-%m-%d %H:%M:%S.%f')
         else:
             self.timestamp = timestamp
 
@@ -167,7 +167,7 @@ class Pool(db.Model):
         self.meta_data = meta_data
         self.log = log
         self.timestamp = datetime.now()
-        self.timestamp.strftime('%Y/%m/%d %H:%M:%S.%f')
+        self.timestamp = self.timestamp.strftime('%Y-%m-%d %H:%M:%S.%f')
         self.block_data = self.case_id + "-" + str(
             self.block_number) + "-" + self.meta_data + "-" + self.log + "-" + str(self.timestamp) \
                           + "-" + self.previous_block_hash
