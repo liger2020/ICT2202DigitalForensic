@@ -82,7 +82,7 @@ class Block(db.Model):
         self.log = log
 
         if timestamp is None:
-            self.timestamp = datetime.now()
+            self.timestamp = parser.parse(str(datetime.now()))
         else:
             self.timestamp = timestamp
 
