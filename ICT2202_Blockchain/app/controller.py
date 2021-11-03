@@ -35,7 +35,7 @@ def convert_to_block(json_block):
         if timestamp is not None:
             timestamp = parser.parse(json_block["timestamp"])
 
-        block = Block(json_block["id"], json.dumps(json_block["meta_data"]), json.dumps(json_block["log"]),
+        block = Block(json_block["id"], json_block["meta_data"], json_block["log"],
                       block_number=json_block.get("block_number"),
                       previous_block_hash=json_block.get("previous_block_hash"), timestamp=timestamp,
                       block_hash=json_block.get("block_hash"), status=json_block.get("status"))
