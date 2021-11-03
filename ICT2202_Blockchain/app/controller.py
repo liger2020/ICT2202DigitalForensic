@@ -220,7 +220,7 @@ def sync_schedule():
         # Check length received
         for length_json in resp_json.get("Blocks"):
             # Make sure json is valid
-            if "id" not in length_json or "length" not in length_json or "last" not in length_json:
+            if "id" not in length_json or "length" not in length_json:
                 continue
 
             case_id = length_json["id"]
