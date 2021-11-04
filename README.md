@@ -1,6 +1,6 @@
 # **ICT2202DigitalForensic**
 
-A secure blockchain-based chain of custody framework alongside a case management system in which a private lightweight blockchain in a case management system that allows authenticated participants to access off-chain evidence stored on a credible storage medium. **(???)**
+A secure blockchain-based chain of custody framework alongside a case management system in which a private lightweight blockchain in a case management system that allows authenticated participants to access off-chain evidence stored on a credible storage medium[^note]. **(???)**
 
 **\<Brief Introduction\>**
 
@@ -9,6 +9,9 @@ A secure blockchain-based chain of custody framework alongside a case management
 ## Table of Contents
 --------------------
 - [Getting Started](#getting-started)
+  - [Virtual Environment](#virtual-environment)
+  - [Installing Dependencies](#installing-dependencies)
+  - [Running](#running)
 - [Configuration](#configuration)
 - [User Guide](#user-guide)
 - [Documentation](#documentation)
@@ -29,15 +32,16 @@ cd ICT2202DigitalForensic
 
 The project contains both "server" and "client" side codes.
 
+<br>
 
-##### Server
+##### **Server**
 For server, you can navigate into the directory:
 
 ```bash
 cd ICT2202_Blockchain
 ```
 
-##### Client
+##### **Client**
 For client, you can navigate into the directory:
 
 ```bash
@@ -93,7 +97,31 @@ def insert_initial_values(*args, **kwargs):
 
 ## User Guide
 -------------
-**\<User guide\>**
+**\<Type User guide\>**
+
+```json
+{
+    "case_id": "1",
+    "meta_data": {
+        "File_Hash": "F8659EDDABAA5675263BC9D11924B291A3F8AA6F6F9FC62513EAA11EF05262A4",
+        "File_Name": "TestFile",
+        "Modified_Date": "3/11/2021 11:30:20 pm",
+        "Creation_Date": "3/11/2021 11:30:20 pm"
+    },
+    "log": {
+        "Action": "Upload",
+        "Username": [
+            "TestUser"
+        ]
+    }
+}
+```
+
+Block
+
+| id  | block_number | previous_block_hash | meta_data | log | timestamp | block_hash | status |
+| :-: | :----------: | :-----------------: | :-------: | :-: | :-------: | :--------: | :----: |
+| 1 | 0 |   | {"File_Hash": "F8659EDDABAA5675263BC9D11924B291A3F8AA6F6F9FC62513EAA11EF05262A4", "File_Name": "TestFile", "Modified_Date": "3/11/2021 11:30:20 pm", "Creation_Date": "3/11/2021 11:30:20 pm"}  | {"Action": "Upload", "Username": \["TestUser"\]}  | 2021-11-04 17:08:18.430813  | 7db76249a6170b519fad6e5735d97cc5748b14fe14cebd883e72a404c9a05f47  | 1  |
 
 ## Documentation
 ----------------
@@ -105,3 +133,5 @@ The documentation is also available in [GitHub Pages][documentation].
 [documentation]: https://liger2020.github.io/ICT2202DigitalForensic/
 
 [blockchain]: https://liger2020.github.io/ICT2202DigitalForensic/images/blockchain.png
+
+[^note]: This is an assignment for ICT2202.
