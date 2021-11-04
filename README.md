@@ -17,40 +17,58 @@ A secure blockchain-based chain of custody framework alongside a case management
 ------------------
 To clone the git, type:
 
-`git clone https://github.com/liger2020/ICT2202DigitalForensic.git`
+```bash
+git clone https://github.com/liger2020/ICT2202DigitalForensic.git
+```
 
 Navigate into the project folder:
 
-`cd ICT2202DigitalForensic`
+```bash
+cd ICT2202DigitalForensic
+```
 
 The project contains both "server" and "client" side codes.
+
 
 ##### Server
 For server, you can navigate into the directory:
 
-`cd ICT2202_Blockchain`
+```bash
+cd ICT2202_Blockchain
+```
 
 ##### Client
 For client, you can navigate into the directory:
 
-`cd ICT2202_Blockchain_Client`
+```bash
+cd ICT2202_Blockchain_Client
+```
 
 #### Virtual Environment
 Virtual environment may be created to run if preferred:
 
-`python3 -m venv .venv`
+```bash
+python3 -m venv .venv
+```
 
 You may require python3.8-venv:
 
-`sudo apt install python3.8-venv`
+```bash
+sudo apt install python3.8-venv
+```
 
 #### Installing Dependencies
 Install dependencies using the requirements.txt:
 
-`pip install -r requirements.txt`
+```bash
+pip install -r requirements.txt
+```
 
 #### Running
-Run `python3 run.py` to start the server/client.
+To start the server/client:
+```bash
+python3 run.py
+```
 
 ## Configuration
 ----------------
