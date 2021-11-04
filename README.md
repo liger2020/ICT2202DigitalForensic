@@ -25,12 +25,12 @@ Navigate into the project folder:
 
 The project contains both "server" and "client" side codes.
 
-###### Server
+##### Server
 For server, you can navigate into the directory:
 
 `cd ICT2202_Blockchain`
 
-###### Client
+##### Client
 For client, you can navigate into the directory:
 
 `cd ICT2202_Blockchain_Client`
