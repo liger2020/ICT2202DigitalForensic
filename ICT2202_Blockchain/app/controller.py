@@ -254,13 +254,13 @@ def sync_schedule():
                         for user in user_list:
                             # Check exist
                             test = UserCase.query \
-                                .filter(username=user, case_id=block.case_id) \
+                                .filter_by(username=user, case_id=block.id) \
                                 .first()
                             if test is not None:
                                 continue
 
                             # Add User to case
-                            usercase = UserCase(user, block.case_id)
+                            usercase = UserCase(user, block.id)
                             db.session.add(usercase)
 
                 # If verified add to block, else discard
