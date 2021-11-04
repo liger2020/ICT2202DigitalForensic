@@ -202,7 +202,7 @@ def get_peers():
     :return: List of caseid
     :rtype:
         - Success - list, 200
-        - Failure - str, 404
+        - Failure - str, 200
     """
     case_list = set()
 
@@ -309,7 +309,7 @@ def filenameAndHash():
         for i in sql:
             i = json.loads(i["meta_data"])
             if i["File_Name"] != "":
-                output.add('File_Name:'+i["File_Name"]+","+'File_Hash:' + str(i["File_Hash"]))
-        return jsonify(list(output))
+                output.add({'File_Name': i["File_Name"], "File_Hash": i["File_Hash"]})
+        return jsonify(Files=list(output))
     else:
         return "fail"
