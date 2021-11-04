@@ -6,35 +6,33 @@
 Welcome to ICT2202 Blockchain Client's documentation!
 =====================================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+Client
+------
+
+.. automodule:: app.views
+   :members:
+
+.. automodule:: app.controller
+   :members:
+
+.. automodule:: app.models
+   :members:
 
 Server
 ------
 
-.. automodule:: app.views
+.. automodule:: app2.views
    :members:
 
-.. automodule:: app.controller
+.. automodule:: app2.controller
    :members:
 
-.. automodule:: app.models
+.. automodule:: app2.models
    :members:
 
-Client
-------
-
-.. currentmodule:: app2
-
-.. automodule:: app.views
-   :members:
-
-.. automodule:: app.controller
-   :members:
-
-.. automodule:: app.models
-   :members:
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
 
 Indices and tables
 ==================

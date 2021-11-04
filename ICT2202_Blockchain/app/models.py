@@ -66,9 +66,21 @@ class Block(db.Model):
         """
         this for the creation of a new block NOT for the blockchain
         :param id: case number
+        :type id: str
         :param block_number: position in the blockchain
-        :param previous_block_hash: this refers to the hash of the previous block within the chain;
-        :param meta_data: this refers to whatever information we want to put in. can give json format or just str.
+        :type block_number: int
+        :param previous_block_hash: this refers to the parent block hash which is also called the previous block hash
+        :type previous_block_hash: str
+        :param meta_data: this refers information of the files such as, file hash, creation, modifitcation datetime
+        :type meta_data: str
+        :param log: this refers to the action of the user
+        :type log: str
+        :param timestamp: this refers to the time that the block is uploaded
+        :type timestamp: str
+        :param block_hash: this refers to the current block hash
+        :type block_hash: str
+        :param status: this is the status of the block using boolean state whether it is verified/unverified
+        :type status: boolean
         """
 
         self.id = id
@@ -157,8 +169,11 @@ class Pool(db.Model):
     def __init__(self, case_id, meta_data, log):
         """
         :param id: case number
-        :param meta_data: this refers to whatever information we want to put in. can give json format or just str.
+        :type case_id: str
+        :param meta_data: this refers information of the files such as, file hash, creation, modifitcation datetime
+        :type meta_data: str
         :param log: this refers to the action of user
+        :type log: str
         """
 
         self.case_id = case_id

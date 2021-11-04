@@ -93,8 +93,8 @@ def receive_response():
 
     :return: Give a response whether the code runs smoothly 
     :rtype:
-        - "Error Occurred" - str 
-        - "Responding from" - Dict 
+        - Success - dictionary, 200
+        - Failure - str, "Error Occurred"
     """
     resp = request.get_json()
     consensus = convert_to_consensus(resp, request.remote_addr)
