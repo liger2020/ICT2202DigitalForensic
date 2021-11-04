@@ -5,7 +5,7 @@ The webpage routing of flask server
 """
 import datetime
 import sys
-
+import json
 from flask import request, jsonify
 
 from app import app, db, auth
@@ -277,7 +277,7 @@ def caseinfo():
         - Success - dictionary, 200
         - Failure - str, "fail, cannot find case_id"
     """
-    #For testing: curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://{your ip }:5000/caseinfo -d {\"case_id\":\"1\"}
+    # For testing: curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://{your ip }:5000/caseinfo -d {\"case_id\":\"1\"}
     case_id = request.json.get('case_id')
     sql = Block.query.filter_by(id=case_id).all()
     sql = [x.as_dict() for x in sql]
@@ -285,3 +285,28 @@ def caseinfo():
         return jsonify(Blocks=sql)
     else:
         return "fail, cannot find case_id"
+
+
+@app.route('/filenameAndHash', methods=['POST'])
+@auth.login_required
+def filenameAndHash():
+    """
+    Return json of filename and filehash filter by case_id
+
+    :return: dictionary of rows of block
+    :rtype:
+        - Success - dictionary, 200
+        - Failure - str, "fail"
+    """
+    case_id = request.json.get('case_id')
+    sql = Block.query.filter_by(id=case_id).all()
+    sql = [x.as_dict() for x in sql]
+    if sql:
+        output = {}
+        for i in sql:
+            i = json.loads(i["meta_data"])
+            if i["File_Name"] != "":
+                output[i["File_Name"]] = i["File_Hash"]
+        return jsonify(output)
+    else:
+        return "fail"
