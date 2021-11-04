@@ -275,7 +275,7 @@ def caseinfo():
     :return: dictionary of rows of block
     :rtype:
         - Success - dictionary, 200
-        - Failure - str, 404
+        - Failure - str
     """
     # For testing: curl -i -X POST -H "Content-Type:application/json" -H "Authorization:Bearer secret-token-1" http://{your ip }:5000/caseinfo -d {\"case_id\":\"1\"}
     case_id = request.json.get('case_id')
@@ -285,9 +285,9 @@ def caseinfo():
         if verify(case_id):
             return jsonify(Blocks=sql)
         else:
-            return "Blockchain Verification Failed", STATUS_NOT_FOUND
+            return "Blockchain Verification Failed"
     else:
-        return "fail, cannot find case_id", STATUS_NOT_FOUND
+        return "fail, cannot find case_id"
 
 
 @app.route('/filenameAndHash', methods=['POST'])
@@ -299,7 +299,7 @@ def filenameAndHash():
     :return: dictionary of rows of block
     :rtype:
         - Success - dictionary, 200
-        - Failure - str, "fail", 404
+        - Failure - str, "fail"
     """
     case_id = request.json.get('case_id')
     sql = Block.query.filter_by(id=case_id).all()
@@ -312,4 +312,4 @@ def filenameAndHash():
                 output.add('File_Name:'+i["File_Name"]+","+'File_Hash:' + str(i["File_Hash"]))
         return jsonify(list(output))
     else:
-        return "fail", STATUS_NOT_FOUND
+        return "fail"
