@@ -1,10 +1,10 @@
-# **ICT2202DigitalForensic**
+# **ICT2202 Digital Forensic**
 
-A secure blockchain-based chain of custody framework alongside a case management system in which a private lightweight blockchain in a case management system that allows authenticated participants to access off-chain evidence stored on a credible storage medium[^note]. **(???)**
+A private blockchain-based chain of custody framework and case management web portal designed to reduce the likelihood of an insider attack within the system.
 
-**\<Brief Introduction\>**
+![Case Management][case-management]
 
-![Blockchain Image][blockchain]
+![Block Content][blockchain-content]
 
 ## Table of Contents
 --------------------
@@ -65,7 +65,7 @@ sudo apt install python3.8-venv
 Install dependencies using the requirements.txt:
 
 ```bash
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 #### Running
@@ -132,6 +132,8 @@ The documentation is also available in [GitHub Pages][documentation].
 
 [documentation]: https://liger2020.github.io/ICT2202DigitalForensic/
 
-[blockchain]: https://liger2020.github.io/ICT2202DigitalForensic/images/blockchain.png
+[case-management]: https://liger2020.github.io/ICT2202DigitalForensic/images/blockchain-case-management-server.png
+
+[blockchain-content]: https://liger2020.github.io/ICT2202DigitalForensic/images/block-content.png
 
 [^note]: This is an assignment for ICT2202.
