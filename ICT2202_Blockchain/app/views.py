@@ -302,11 +302,11 @@ def filenameAndHash():
     sql = Block.query.filter_by(id=case_id).all()
     sql = [x.as_dict() for x in sql]
     if sql:
-        output = {}
+        output = set()
         for i in sql:
             i = json.loads(i["meta_data"])
             if i["File_Name"] != "":
-                output[i["File_Name"]] = i["File_Hash"]
-        return jsonify(output)
+                output.add('File_Name:'+i["File_Name"]+","+'File_Hash:' + str(i["File_Hash"]))
+        return jsonify(list(output))
     else:
         return "fail"
