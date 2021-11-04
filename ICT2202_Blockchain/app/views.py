@@ -208,7 +208,7 @@ def get_peers():
 
     post_data = request.get_json()
     if "Username" not in post_data:
-        return "", STATUS_NOT_FOUND
+        return "", STATUS_OK
 
     username = post_data["Username"]
     # Get all cases with username
@@ -221,7 +221,7 @@ def get_peers():
             if verify(case_id):
                 case_list.add(case_id)
             else:
-                return "Blockchain Verification Failed", STATUS_NOT_FOUND
+                return "Blockchain Verification Failed", STATUS_OK
         return jsonify({"Cases": sorted(list(case_list))}), STATUS_OK
     else:
         # No Cases Found

@@ -132,8 +132,8 @@ The documentation is also available in [GitHub Pages][documentation].
 
 [documentation]: https://liger2020.github.io/ICT2202DigitalForensic/
 
-[case-management]: https://liger2020.github.io/ICT2202DigitalForensic/images/blockchain-case-management-server.png
+[case-management]: https://liger2020.github.io/ICT2202DigitalForensic/images/blockchain-case-management-server.png "Case Management System"
 
-[blockchain-content]: https://liger2020.github.io/ICT2202DigitalForensic/images/block-content.png
+[blockchain-content]: https://liger2020.github.io/ICT2202DigitalForensic/images/block-content.png "Contents of Blockchain"
 
 [^note]: This is an assignment for ICT2202.
