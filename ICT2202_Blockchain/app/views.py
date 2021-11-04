@@ -305,12 +305,13 @@ def filenameAndHash():
     sql = Block.query.filter_by(id=case_id).all()
     sql = [x.as_dict() for x in sql]
     if sql:
-        output = set()
-        for i in sql:
-            i = json.loads(i["meta_data"])
-            if i["File_Name"] != "":
-                output.add('{"File_Name":' + '"' + i["File_Name"] + '"' + ',"File_Hash":' + '"' + i["File_Hash"] + '"' + '}')
-        return_data = [json.loads(x) for x in list(output)]
-        return jsonify(Files=return_data)
+        if verify(case_id):
+            output = set()
+            for i in sql:
+                i = json.loads(i["meta_data"])
+                if i["File_Name"] != "":
+                    output.add('{"File_Name":' + '"' + i["File_Name"] + '"' + ',"File_Hash":' + '"' + i["File_Hash"] + '"' + '}')
+            return_data = [json.loads(x) for x in list(output)]
+            return jsonify(Files=return_data)
     else:
         return "fail"
