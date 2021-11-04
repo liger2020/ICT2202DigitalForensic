@@ -210,14 +210,17 @@ def request_for_update(peer, case_id, original_block):
         blocks = resp_json["Blocks"]
         # Sort by block number
         blocks = sorted(blocks, key=lambda x: x["block_number"])
-        
+
         if original_block is None:
             previous_hash = ""
             last_length = 0
         else:
             previous_hash = original_block.last_verified_hash
             last_length = original_block.length
+
         for block_json in blocks:
+            original_block = UserStoredInfo.query.filter_by(case_id=case_id).first()
+
             block_json_id = block_json["id"]
             block_json_previous_hash = block_json["previous_hash"]
             block_json_hash = block_json["hash"]

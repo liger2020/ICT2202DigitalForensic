@@ -4,6 +4,7 @@ models.py
 Database model for SQLite database
 """
 import hashlib
+from dateutil import parser
 from datetime import datetime
 
 from app import db
@@ -56,7 +57,7 @@ class Block(db.Model):
     previous_block_hash = db.Column(db.String(255))
     meta_data = db.Column(db.String(255), nullable=True)
     log = db.Column(db.String(255), nullable=True)
-    timestamp = db.Column(db.DateTime, nullable=True)
+    timestamp = db.Column(db.String(255), nullable=True)
     block_hash = db.Column(db.String(255))
     status = db.Column(db.Boolean)
 
@@ -82,6 +83,7 @@ class Block(db.Model):
 
         if timestamp is None:
             self.timestamp = datetime.now()
+            self.timestamp = self.timestamp.strftime('%Y-%m-%d %H:%M:%S.%f')
         else:
             self.timestamp = timestamp
 
@@ -146,7 +148,7 @@ class Pool(db.Model):
     previous_block_hash = db.Column(db.String(255))
     meta_data = db.Column(db.String(255), nullable=True)
     log = db.Column(db.String(255), nullable=True)
-    timestamp = db.Column(db.DateTime, nullable=True)
+    timestamp = db.Column(db.String(255), nullable=True)
     block_hash = db.Column(db.String(255))
     status = db.Column(db.Boolean)
     count = db.Column(db.Integer, nullable=True)
@@ -165,6 +167,7 @@ class Pool(db.Model):
         self.meta_data = meta_data
         self.log = log
         self.timestamp = datetime.now()
+        self.timestamp = self.timestamp.strftime('%Y-%m-%d %H:%M:%S.%f')
         self.block_data = self.case_id + "-" + str(
             self.block_number) + "-" + self.meta_data + "-" + self.log + "-" + str(self.timestamp) \
                           + "-" + self.previous_block_hash

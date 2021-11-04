@@ -1,7 +1,10 @@
 .idea
 ICT2202_Blockchain/.idea
 ICT2202_Blockchain/venv
-ICT2202_Blockchain_client/.idea
-ICT2202_Blockchain_client/venv
+ICT2202_Blockchain/docs/
+ICT2202_Blockchain_Client/.idea
+ICT2202_Blockchain_Client/venv
+ICT2202_Blockchain_Client/docs
+ICT2202_Blockchain_Client/app2
 *.pyc
 *.db
