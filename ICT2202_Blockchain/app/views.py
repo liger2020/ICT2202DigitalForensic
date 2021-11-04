@@ -107,12 +107,13 @@ def receive_response():
         response_timestamp = pool.sendout_time
         try:
             if (response_timestamp + datetime.timedelta(seconds=TIMEOUT)) >= datetime.datetime.now():
-                # Add to consensus Table TODO Add checks
+                # Add to consensus Table
                 consent = Consensus.query.filter_by(ip_address=consensus.ip_address, pool_id=consensus.pool_id).first()
                 if consent is None:
                     db.session.add(consensus)
                     db.session.commit()
                 else:
+                    consent.response = consensus.response
                     consent.receive_timestamp = consensus.receive_timestamp
                     db.session.commit()
             else:

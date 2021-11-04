@@ -33,9 +33,9 @@ def convert_to_block(json_block):
     try:
         timestamp = json_block.get("timestamp")
         if timestamp is not None:
-            timestamp = parser.parse(json_block["timestamp"])
+            timestamp = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S.%f')
 
-        block = Block(json_block["id"], json.dumps(json_block["meta_data"]), json.dumps(json_block["log"]),
+        block = Block(json_block["id"], json_block["meta_data"], json_block["log"],
                       block_number=json_block.get("block_number"),
                       previous_block_hash=json_block.get("previous_block_hash"), timestamp=timestamp,
                       block_hash=json_block.get("block_hash"), status=json_block.get("status"))
@@ -62,7 +62,7 @@ def convert_to_pool(json_block):
             block.meta_data = json_block["meta_data"]
             block.log = json_block["log"]
             if isinstance(json_block["timestamp"], str):
-                block.timestamp = parser.parse(json_block["timestamp"])
+                block.timestamp = datetime.strptime(json_block["timestamp"], '%Y-%m-%d %H:%M:%S.%f')
             else:
                 block.timestamp = json_block["timestamp"]
             block.block_hash = json_block["block_hash"]
@@ -220,7 +220,7 @@ def sync_schedule():
         # Check length received
         for length_json in resp_json.get("Blocks"):
             # Make sure json is valid
-            if "id" not in length_json or "length" not in length_json or "last" not in length_json:
+            if "id" not in length_json or "length" not in length_json:
                 continue
 
             case_id = length_json["id"]
@@ -244,6 +244,24 @@ def sync_schedule():
                 for block_json in resp_json.get("Blocks"):
                     block = convert_to_block(block_json)
                     db.session.add(block)
+
+                    # Load string as json
+                    log_json = json.loads(block.log)
+
+                    # Check log action add user
+                    if "AddUser" == log_json["Action"]:
+                        user_list = log_json["Username"]
+                        for user in user_list:
+                            # Check exist
+                            test = UserCase.query \
+                                .filter(username=user, case_id=block.case_id) \
+                                .first()
+                            if test is not None:
+                                continue
+
+                            # Add User to case
+                            usercase = UserCase(user, block.case_id)
+                            db.session.add(usercase)
 
                 # If verified add to block, else discard
                 if verify(case_id):

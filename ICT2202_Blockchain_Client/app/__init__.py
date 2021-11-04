@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_httpauth import HTTPTokenAuth
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy, event
 from flask_apscheduler import APScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
@@ -32,9 +32,8 @@ from app.models import Peers
 @event.listens_for(Peers.__table__, 'after_create')
 def insert_initial_values(*args, **kwargs):
     init_list = [
-        ("10.6.0.2", 5000, "server"),
-        ("10.6.0.3", 5000, "server"),
-        ("10.6.0.4", 5000, "client"),
+        ("127.0.0.1", 5000, "server"),
+        ("192.168.1.1", 5000, "client"),
     ]
     for (ip_address, port, server_type) in init_list:
         db.session.add(Peers(ip_address=ip_address, port=port, server_type=server_type))
