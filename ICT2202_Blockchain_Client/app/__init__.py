@@ -25,6 +25,22 @@ bg_scheduler = BackgroundScheduler()
 bg_scheduler.add_job(func=sync_schedule, trigger="interval", seconds=10)
 bg_scheduler.start()
 
+from app.models import Peers
+
+
+# Init the Peers Table db with values (hardcode)
+@event.listens_for(Peers.__table__, 'after_create')
+def insert_initial_values(*args, **kwargs):
+    init_list = [
+        ("10.6.0.2", 5000, "server"),
+        ("10.6.0.3", 5000, "server"),
+        ("10.6.0.4", 5000, "client"),
+    ]
+    for (ip_address, port, server_type) in init_list:
+        db.session.add(Peers(ip_address=ip_address, port=port, server_type=server_type))
+    db.session.commit()
+
+
 # Build the database
 db.create_all()
 
