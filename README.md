@@ -2,6 +2,8 @@
 
 A private blockchain-based chain of custody framework and case management web portal designed to reduce the likelihood of an insider attack within the system.
 
+This blockchain works together with the [case management webserver][case-mamangement-link].
+
 ![Case Management][case-management]
 
 ![Block Content][blockchain-content]
@@ -269,10 +271,12 @@ The documentation is available in /docs directory.
 The documentation is also available in [GitHub Pages][documentation].
 
 
-[documentation]: https://liger2020.github.io/ICT2202DigitalForensic/
+[case-mamangement-link]: https://github.com/liger2020/ICT2202DigitalForensic_Duplicate_Local
 
 [case-management]: https://liger2020.github.io/ICT2202DigitalForensic/images/blockchain-case-management-server.png "Case Management System"
 
 [blockchain-content]: https://liger2020.github.io/ICT2202DigitalForensic/images/block-content.png "Contents of Blockchain"
+
+[documentation]: https://liger2020.github.io/ICT2202DigitalForensic/
 
 [^note]: This is an assignment for ICT2202.
