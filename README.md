@@ -22,7 +22,7 @@ This blockchain works together with the [case management webserver][case-mamange
   - [Nodes File](#nodes-file)
 - [User Guide](#user-guide)
   - [Adding Blocks](#adding-blocks)
-  - [User's Assigned Case](#user's-assigned-case)
+  - [User's Assigned Case](#users-assigned-case)
   - [Case Information](#case-information)
   - [Filename and Hash Information](#filename-and-hash-information)
 - [Docudwadmentation](#documentation)
