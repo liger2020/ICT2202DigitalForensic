@@ -40,12 +40,18 @@ from app.models import Peers
 @event.listens_for(Peers.__table__, 'after_create')
 def insert_initial_values(*args, **kwargs):
     init_list = []
-    with open(os.path.join(BASE_DIR, 'nodes.txt'), "r") as f:
-        lines = f.readlines()
+    try:
+        with open(os.path.join(BASE_DIR, 'nodes.txt'), "r") as f:
+            lines = f.readlines()
 
-        for line in lines:
-            (ip, port, servertype) = line.split(sep=',')
-            init_list.append((ip, int(port), servertype))
+            for line in lines:
+                (ip, port, servertype) = line.strip().split(sep=',')
+                init_list.append((ip, int(port), servertype))
+    except FileNotFoundError:
+        init_list = [
+            ("127.0.0.1", 5000, "server"),
+            ("192.168.1.1", 5000, "client"),
+        ]
 
     for (ip_address, port, server_type) in init_list:
         db.session.add(Peers(ip_address=ip_address, port=port, server_type=server_type))

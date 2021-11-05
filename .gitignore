@@ -2,9 +2,13 @@
 ICT2202_Blockchain/.idea
 ICT2202_Blockchain/venv
 ICT2202_Blockchain/docs/
+ICT2202_Blockchain/build
+ICT2202_Blockchain/run.spec
 ICT2202_Blockchain_Client/.idea
 ICT2202_Blockchain_Client/venv
 ICT2202_Blockchain_Client/docs
 ICT2202_Blockchain_Client/app2
+ICT2202_Blockchain_Client/build
+ICT2202_Blockchain_Client/run.spec
 *.pyc
 *.db
