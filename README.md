@@ -2,7 +2,7 @@
 
 A private blockchain-based chain of custody framework and case management web portal designed to reduce the likelihood of an insider attack within the system.
 
-This blockchain works together with the [case management webserver][case-mamangement-link].
+This blockchain works together with the **[Case Management WebServer][case-mamangement-link]**.
 
 ![Case Management][case-management]
 
